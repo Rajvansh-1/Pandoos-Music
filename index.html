@@ -1,140 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Spotify - Web Player: Music for everyone</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Pandoos Library — Your personal panda-themed music universe. Discover, stream, and enjoy real music powered by Jamendo." />
+  <meta name="theme-color" content="#34d399" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <!-- SEO -->
+  <title>Pandoos Library — Panda Music Universe 🐼</title>
+
+  <!-- Open Graph -->
+  <meta property="og:title"       content="Pandoos Library" />
+  <meta property="og:description" content="Your panda-themed personal music universe. Real music powered by Jamendo API." />
+  <meta property="og:type"        content="music.playlist" />
+
+  <!-- Preconnect for Google Fonts & Jamendo -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://api.jamendo.com" />
+
+  <!-- Design System (order matters) -->
+  <link rel="stylesheet" href="src/css/variables.css" />
+  <link rel="stylesheet" href="src/css/base.css" />
+  <link rel="stylesheet" href="src/css/layout.css" />
+  <link rel="stylesheet" href="src/css/components.css" />
+  <link rel="stylesheet" href="src/css/player.css" />
+  <link rel="stylesheet" href="src/css/overlay.css" />
 </head>
-
 <body>
-    <div class="container flex bg-black">
-        <div class="left">
-            <div class="home bg-grey rounded m-1 p-1">
-                <div class="logo"><img class="invert" src="logo.svg" alt=""> </div>
 
-                <ul>
-                    <li><img class="invert" src="home.svg" alt="home">Home</li>
-                    <li><img class="invert" src="search.svg" alt="search">Search </li>
-                </ul>
-            </div>
+  <!-- App Shell (populated entirely by JS) -->
+  <div id="app">
+    <!-- Sidebar -->
+    <aside id="sidebar" role="navigation" aria-label="Main navigation"></aside>
 
-            <div class="library bg-grey rounded m-1 p-1">
-                <div class="heading">
-                    <img class="invert" src="playlist.svg" alt="">
-                    <h2>
-                        Your Library
-                    </h2>
-                </div>
-                <div class="playList">
-                    <ul>
-
-
-
-                    </ul>
-
-                </div>
-
-                <div class="footer">
-                    <div><a href="https://www.spotify.com/jp/legal/"><span>Legal</span></a></div>
-                    <div><a href="https://www.spotify.com/jp/privacy/"><span>Privacy Center</span></a></div>
-                    <div><a href="https://www.spotify.com/jp/legal/privacy-policy/"><span>Privacy Policy</span></a>
-                    </div>
-                    <div><a href="https://www.spotify.com/jp/legal/cookies-policy/"><span>Cookies</span></a></div>
-                    <div><a href="https://www.spotify.com/jp/legal/privacy-policy/#s3"><span>About Ads</span></a></div>
-                    <div><a href="https://www.spotify.com/jp/accessibility/"><span>Accessibility</span></a></div>
-                </div>
-            </div>
-
-
-        </div>
-        <div class="right bg-grey rounded  ">
-            <div class="header">
-                <div class="nav">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M15 6L9.70711 11.2929C9.37377 11.6262 9.20711 11.7929 9.20711 12C9.20711 12.2071 9.37377 12.3738 9.70711 12.7071L15 18"
-                            stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M9 18L14.2929 12.7071C14.6262 12.3738 14.7929 12.2071 14.7929 12C14.7929 11.7929 14.6262 11.6262 14.2929 11.2929L9 6"
-                            stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                </div>
-                <div class="buttons">
-                    <button class="signupbtn">Sign up</button>
-                    <button class="loginbtn">Log in</button>
-                </div>
-            </div>
-            <div class="spotifyplaylists ">
-                <h1>spotify playlists</h1>
-                <div class="cardContainer">
-                    <div class="card ">
-                        <div class="play">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" fill="none"
-                                height="16">
-                                <path d="M5 20V4L19 12L5 20Z" stroke="#141B34" stroke-width="1.5" fill="black"
-                                    stroke-linejoin="round" />
-                            </svg>
-
-
-
-                        </div>
-                        <img src="https://i.scdn.co/image/ab67706f00000002b55b6074da1d43715fc16d6d" alt="">
-                        <h2>Happy Hits</h2>
-                        <p>Hits boost your mood and fill you with happiness! </p>
-                    </div>
-
-                    <div class="card ">
-                        <div class="play">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" fill="none"
-                                height="16">
-                                <path d="M5 20V4L19 12L5 20Z" stroke="#141B34" stroke-width="1.5" fill="black"
-                                    stroke-linejoin="round" />
-                            </svg>
-
-
-
-                        </div>
-                        <img src="https://i.scdn.co/image/ab67706f00000002b55b6074da1d43715fc16d6d" alt="">
-                        <h2>Happy Hits</h2>
-                        <p>Hits boost your mood and fill you with happiness! </p>
-                    </div>
-
-
-
-
-
-
-
-
-                </div>
-                <div class="playbar">
-                    <div class="seekbar">
-                        <div class="circle">
-
-                        </div>
-                    </div>
-
-                    <div class="songinfo"></div>
-                    <div class="songbuttons">
-                        <img id="prevsong" src="prevsong.svg" alt="Previous Song">
-                        <img id="playpause" src="play.svg" alt="Play/Pause">
-                        <img id="nextsong" src="nextsong.svg" alt="Next Song">
-                    </div>
-                    <div class="songtime">
-
-                    </div>
-
-                </div>
-            </div>
-        </div>
+    <!-- Main Area -->
+    <div id="main-wrapper">
+      <header id="topbar" role="banner"></header>
+      <main id="main-content" role="main" aria-live="polite" aria-atomic="false"></main>
     </div>
-    <script src="script.js"></script>
-</body>
 
+    <!-- Player Bar -->
+    <footer id="playbar" role="complementary" aria-label="Music player"></footer>
+  </div>
+
+  <!-- Mobile overlay -->
+  <div id="sidebar-overlay" role="presentation" aria-hidden="true"></div>
+
+  <!-- Toast notifications -->
+  <div id="toast-container" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- App -->
+  <script type="module" src="src/js/app.js"></script>
+
+</body>
 </html>
