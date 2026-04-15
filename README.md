@@ -1,157 +1,205 @@
+<div align="center">
+
 # 🐼 Pandoos Music
 
-A panda-themed, modern music web app built with **vanilla HTML, CSS, and JavaScript modules**.  
-It streams real tracks from **Jamendo API** and automatically falls back to local songs when needed.
+**A panda-themed music streaming web app — real tracks, zero frameworks, pure vibes.**
+
+[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
+[![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
+[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![Jamendo API](https://img.shields.io/badge/Jamendo_API-34d399?style=for-the-badge&logo=music&logoColor=white)](https://developer.jamendo.com/v3.0)
+[![No Dependencies](https://img.shields.io/badge/Zero_Dependencies-🐼-black?style=for-the-badge)](https://github.com/Daksh-Mehandiratta/Pandoos-Music)
+
+</div>
 
 ---
 
-## ✨ Highlights
+## 🎧 What Is This?
 
-- Beautiful, responsive panda-themed UI
-- Real music streaming via Jamendo API
-- Automatic local fallback (`/songs/`) if API is unavailable
-- Playlist-based listening experience
-- Search with query + genre filters
-- Like/favorite system persisted in `localStorage`
-- Full playbar controls: play/pause, next/prev, seek, volume, mute, shuffle, repeat
-- Song detail overlay + clipboard share action
-- Lightweight hash routing (`#home`, `#search`, `#library`, `#playlist:<id>`)
-- No framework dependency
+**Pandoos Music** is a fully client-side music player styled around a panda aesthetic.  
+It streams real, licensed music from the **Jamendo API** and gracefully falls back to local `.mp3` files when the API isn't reachable — all without a single npm package or build step.
+
+> _"Life is short — relax like a panda and enjoy good music." 🌿_
+
+---
+
+## ✨ Features
+
+| Feature | Details |
+|---|---|
+| 🎵 Real Music Streaming | Jamendo API — 50 popular tracks on load |
+| 🔎 Search + Genres | Live search + genre filter pills (Rock, Pop, Chill, Jazz, Classical, Indie, Folk) |
+| 📋 Playlists | Pandoos Picks · Bamboo Chill · Panda Power · Moonlit Melodies · Heart Stash |
+| ❤️ Likes | Like any track; persisted in `localStorage` |
+| 🔀 Shuffle & 🔁 Repeat | Shuffle queue or cycle None → All → One repeat modes |
+| 🎚️ Full Playbar | Play/Pause · Prev/Next · Seek · Volume · Mute |
+| 📊 Visualizer | Web Audio API frequency visualizer |
+| 🗂️ Song Detail Overlay | Metadata panel with clipboard share |
+| 🧭 Hash Router | `#home` · `#search` · `#library` · `#playlist:<id>` |
+| 📱 Mobile Ready | Responsive layout with sidebar overlay for small screens |
+| 🔋 Persistent State | Volume, last played song, liked songs — all saved across sessions |
 
 ---
 
 ## 🧱 Tech Stack
 
-- **Frontend:** HTML5, CSS3, JavaScript (ES Modules)
-- **Audio:** HTMLAudioElement + Web Audio API (analyser for visualizer)
-- **Data Source:** Jamendo API (`https://api.jamendo.com/v3.0`)
-- **Fallback Data:** local MP3 files from `/songs/`
+```
+┌──────────────────────────────────────────────────┐
+│                  Pandoos Music                   │
+├──────────────────────────────────────────────────┤
+│  UI Layer        HTML5 · CSS3 · ES Modules       │
+│  Audio Engine    HTMLAudioElement + Web Audio API │
+│  State           Custom pub/sub store (store.js) │
+│  Routing         Hash-based router (router.js)   │
+│  Data            Jamendo API  →  local fallback  │
+└──────────────────────────────────────────────────┘
+```
 
 ---
 
 ## 🚀 Quick Start
 
-> This project is static and should be run through a local web server (not by opening `index.html` directly).
+> ⚠️ Run through a local web server — **not** by opening `index.html` directly as a `file://` URL.
 
-### 1) Clone
+**Clone the repo:**
 
 ```bash
 git clone https://github.com/Daksh-Mehandiratta/Pandoos-Music.git
 cd Pandoos-Music
 ```
 
-### 2) Start a local server
-
-Use any static server. Example:
+**Start a local server** (pick any option):
 
 ```bash
+# Option A — npx (Node.js required)
 npx serve .
+
+# Option B — Python 3
+python3 -m http.server 8080
+
+# Option C — VS Code Live Server
+# Install the "Live Server" extension, then click "Go Live"
 ```
 
-Then open the shown URL in your browser.
+Open the printed URL in your browser and enjoy 🐼🎵
 
 ---
 
 ## ⚙️ Configuration
 
-Jamendo client ID is currently set in:
+The Jamendo public client ID lives in one place:
 
-- `src/js/api.js` → `JAMENDO_CLIENT_ID`
+```js
+// src/js/api.js
+const JAMENDO_CLIENT_ID = 'b6747d04';   // ← replace with your own key
+```
 
-If you want to use your own API key, replace that constant.
+Get a free key at [developer.jamendo.com](https://developer.jamendo.com/v3.0).
 
 ---
 
 ## 📁 Project Structure
 
-```text
+```
 Pandoos-Music/
-├── index.html
+├── index.html              ← App shell (JS-rendered)
+├── assets/                 ← Logo, favicon, images
+├── songs/                  ← Local MP3 fallback files
 ├── src/
 │   ├── css/
-│   │   ├── variables.css
-│   │   ├── base.css
-│   │   ├── layout.css
-│   │   ├── components.css
-│   │   ├── player.css
-│   │   └── overlay.css
+│   │   ├── variables.css   ← Design tokens & CSS custom properties
+│   │   ├── base.css        ← Reset & global styles
+│   │   ├── layout.css      ← Sidebar / main / playbar layout
+│   │   ├── components.css  ← Cards, buttons, badges…
+│   │   ├── player.css      ← Playbar & player controls
+│   │   └── overlay.css     ← Song detail overlay
 │   └── js/
-│       ├── app.js
-│       ├── api.js
-│       ├── player.js
-│       ├── router.js
-│       ├── store.js
-│       ├── utils.js
+│       ├── app.js          ← Bootstrap & orchestration
+│       ├── api.js          ← Jamendo fetchers + local fallback
+│       ├── player.js       ← Audio engine (play/pause/seek/shuffle…)
+│       ├── router.js       ← Hash-based client router
+│       ├── store.js        ← Reactive state + pub/sub
+│       ├── utils.js        ← Helpers (debounce, formatTime, …)
+│       ├── assets.js       ← Inline SVG icon constants
 │       └── ui/
-│           ├── home.js
-│           ├── search.js
-│           ├── playlist.js
-│           ├── library.js
-│           ├── playbar.js
-│           ├── sidebar.js
-│           ├── topbar.js
-│           ├── overlay.js
-│           └── visualizer.js
-├── songs/
-└── assets/
+│           ├── home.js     ← Home view
+│           ├── search.js   ← Search & genre filter view
+│           ├── playlist.js ← Playlist detail view
+│           ├── library.js  ← Library overview
+│           ├── playbar.js  ← Bottom playbar component
+│           ├── sidebar.js  ← Sidebar navigation
+│           ├── topbar.js   ← Top bar + toast notifications
+│           ├── overlay.js  ← Song detail overlay
+│           └── visualizer.js ← Web Audio frequency bars
+└── style.css               ← Legacy styles (v1 prototype)
 ```
 
 ---
 
 ## 🧠 How It Works
 
-1. App boots from `src/js/app.js`
-2. Songs are fetched from Jamendo (`fetchSongs`)
-3. If Jamendo fails, local `/songs/` is used
-4. State is managed via `src/js/store.js`
-5. UI views render based on hash routes
-6. Player engine (`src/js/player.js`) controls playback and updates state
+```
+DOMContentLoaded
+      │
+      ▼
+ bootstrap()               ← app.js
+      │
+      ├─ Init UI shells     ← sidebar, topbar, playbar, overlay
+      ├─ Init views         ← home, search, playlist, library
+      ├─ Init router        ← listens to hashchange
+      │
+      ├─ fetchSongs()       ← api.js
+      │     ├─ Jamendo API  (primary, 50 tracks)
+      │     └─ /songs/      (fallback, local MP3s)
+      │
+      ├─ setState()         ← store.js reactive update
+      ├─ initPlayer()       ← player.js audio engine
+      ├─ initVisualizer()   ← Web Audio API
+      └─ renderView()       ← route → home / search / library / playlist
+```
 
 ---
 
-## 🎵 Music Sources
+## 🎵 Adding Local Songs
 
-- **Primary:** Jamendo tracks (with metadata and cover art)
-- **Fallback:** local `.mp3` files in `/songs/`
-
-For local mode, place MP3 files in the `songs/` folder and ensure your server can list/access that directory.
-
----
-
-## 🛠️ Development Notes
-
-- This repository currently has **no configured build/lint/test pipeline**.
-- It is designed to run as a direct static web app.
-- Keep modules in `src/js` small and feature-focused for maintainability.
+1. Drop `.mp3` files into the `songs/` folder.
+2. Start the local server — the app automatically discovers them.
+3. Local files are used as fallback when Jamendo is unreachable.
 
 ---
 
 ## 🧩 Troubleshooting
 
-- **No songs showing?**  
-  Start via a local server (`npx serve .`), not `file://`.
-
-- **Jamendo not loading?**  
-  Check internet access/API availability. App should fallback to local songs.
-
-- **Playback issues on first interaction?**  
-  Some browsers require a user gesture before audio context fully activates.
+| Problem | Fix |
+|---|---|
+| **No songs showing** | Use `npx serve .`, never `file://` |
+| **Jamendo not loading** | Check network — app auto-falls back to local songs |
+| **No audio on first click** | Normal browser behaviour — Web Audio needs a user gesture to start |
+| **Cover art missing** | Local songs have no cover art; a gradient placeholder is shown |
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome.
+Contributions and improvements are welcome!
 
-1. Fork the repo
-2. Create a feature branch
-3. Make focused changes
-4. Open a pull request
+1. **Fork** this repo
+2. **Create** a feature branch: `git checkout -b feat/my-feature`
+3. **Commit** with a clear message: `git commit -m "feat: add my feature"`
+4. **Push** and open a **Pull Request**
+
+Please keep PRs focused — one feature or fix per PR.
 
 ---
 
 ## 📜 License
 
-No license file is currently defined in this repository.  
-Add a `LICENSE` file if you want to declare usage rights explicitly.
+No license is currently defined in this repository.  
+If you fork or distribute this project, consider adding a `LICENSE` file (e.g. MIT or Apache 2.0).
+
+---
+
+<div align="center">
+  Made with ❤️ and 🐼 energy by <a href="https://github.com/Daksh-Mehandiratta">Daksh Mehandiratta</a>
+</div>
 
