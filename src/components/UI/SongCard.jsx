@@ -1,6 +1,8 @@
 import { usePlayer } from '../../context/PlayerContext.jsx';
+import { useNavigate } from 'react-router-dom';
 
 export default function SongCard({ song, queue, index = 0 }) {
+  const navigate = useNavigate();
   const { state, actions } = usePlayer();
   const isCurrent = state.currentSong?.id === song.id;
   const isPlaying  = isCurrent && state.isPlaying;
@@ -65,7 +67,14 @@ export default function SongCard({ song, queue, index = 0 }) {
       </div>
 
       <div className="card-title" title={song.title}>{song.title}</div>
-      <div className="card-subtitle" title={song.artist}>{song.artist}</div>
+      <div 
+        className="card-subtitle hover-link" 
+        title={song.artist}
+        onClick={(e) => { e.stopPropagation(); navigate(`/artist/${encodeURIComponent(song.artist)}`); }}
+        style={{ cursor: 'pointer', display: 'inline-block' }}
+      >
+        {song.artist}
+      </div>
     </div>
   );
 }

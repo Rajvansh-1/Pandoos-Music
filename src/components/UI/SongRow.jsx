@@ -1,8 +1,10 @@
 import { usePlayer } from '../../context/PlayerContext.jsx';
+import { useNavigate } from 'react-router-dom';
 import LikeButton from './LikeButton.jsx';
 import { formatDuration } from '../../services/youtube.js';
 
 export default function SongRow({ song, index, queue, showIndex = true }) {
+  const navigate = useNavigate();
   const { state, actions } = usePlayer();
   const isPlaying = state.currentSong?.id === song.id && state.isPlaying;
   const isCurrent = state.currentSong?.id === song.id;
@@ -55,7 +57,14 @@ export default function SongRow({ song, index, queue, showIndex = true }) {
         )}
         <div className="song-row-text">
           <div className="song-row-title">{song.title}</div>
-          <div className="song-row-artist">{song.artist}</div>
+          <div 
+            className="song-row-artist hover-link" 
+            title={song.artist}
+            onClick={(e) => { e.stopPropagation(); navigate(`/artist/${encodeURIComponent(song.artist)}`); }}
+            style={{ cursor: 'pointer' }}
+          >
+            {song.artist}
+          </div>
         </div>
       </div>
 

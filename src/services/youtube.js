@@ -10,6 +10,12 @@
 
 import { YOUTUBE_API_KEY } from '../config.js';
 
+// Auto-flush legacy dirty caches
+if (!localStorage.getItem('yt_cache_reset_v2')) {
+  Object.keys(localStorage).filter(k => k.startsWith('yt_cache_')).forEach(k => localStorage.removeItem(k));
+  localStorage.setItem('yt_cache_reset_v2', 'true');
+}
+
 const YT_API = 'https://www.googleapis.com/youtube/v3';
 
 // ─── Cache Layer ──────────────────────────────────────────
@@ -70,23 +76,43 @@ function buildSong(item, durationSec = 0) {
     thumbs.medium?.url ||
     thumbs.default?.url|| '';
 
-  const rawTitle = (snippet.title || 'Unknown').replace(/&amp;/g,'&').replace(/&#39;/g,"'").replace(/&quot;/g,'"');
-  let title  = rawTitle;
+  const rawTitle = (snippet.title || 'Unknown').replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"');
+  let title = rawTitle;
   let artist = snippet.channelTitle || 'YouTube';
 
-  // Smart Artist - Title split (handles most YouTube music titles)
-  const patterns = [
-    /^(.+?)\s*[-–—]\s*(.+?)(?:\s*[\(\[].+?[\)\]])?\s*(?:official\s+(?:video|audio|lyric|mv|visualizer)?)?$/i,
-    /^(.+?)\s*[|]\s*(.+)$/i,
-  ];
-  for (const re of patterns) {
-    const m = rawTitle.match(re);
-    if (m && m[1] && m[2]) {
-      artist = m[1].trim().replace(/official.*/gi,'').trim();
-      title  = m[2].trim().replace(/official\s*(video|audio|lyric|mv|visualizer)?/gi,'').replace(/\s{2,}/g,' ').trim();
-      if (title) break;
+  // 1. Remove generic YouTube noise labels
+  let cleanTitle = rawTitle.replace(/\s*(?:\[|\(|\{)(?:official\s+(?:video|audio|music\s+video|lyric\s+video|lyrics|movie|mv|visualizer|teaser|trailer)|4k|1080p|hq|hd|full\s+video|full\s+song|full\s+audio|lyrical|lyric|video|audio|live)(?:\]|\)|\})/gi, '');
+  
+  // 2. Remove leading "Lyrical:" or "Official Video:" stuff
+  cleanTitle = cleanTitle.replace(/^(?:Lyrical\s*:|Official\s+Video\s*:|Official\s+Audio\s*:|Full\s+Song\s*:|Video\s*:|Audio\s*:)\s*/i, '');
+  
+  // 3. Strip common channel suffixes like " - Topic" or " VEVO" from the channelTitle
+  artist = artist.replace(/\s*-\s*Topic/i, '').replace(/VEVO/i, '').trim();
+
+  // 4. Try to split by common separators: "-" or "|"
+  // Often: "Artist - Title" OR "Title | Artist | Movie"
+  const dashSplit = cleanTitle.split(/\s+[-–—]\s+/);
+  const pipeSplit = cleanTitle.split(/\s*\|\s*/);
+
+  if (pipeSplit.length > 1) {
+    // Pipe format usually implies "Title | Artist | Movie" OR "Title | Movie | Artist"
+    title = pipeSplit[0].trim();
+    // Use the channel artist unless we find a highly probable artist in the pipes (like comma separated names)
+    // Actually, channelTitle without "- Topic" is incredibly accurate for artists generally, but pipe 1 is often the artist.
+    if (pipeSplit[1] && pipeSplit[1].length < 40 && !pipeSplit[1].toLowerCase().includes('t-series')) {
+      artist = pipeSplit[1].trim();
     }
+  } else if (dashSplit.length > 1) {
+    // Dash format usually implies "Artist - Title"
+    artist = dashSplit[0].trim();
+    title = dashSplit[1].trim();
+  } else {
+    title = cleanTitle.trim();
   }
+
+  // Fallback cleanup: remove any lingering "ft." or brackets that couldn't be caught
+  title = title.replace(/\s*(?:\[|\()(?:feat\.?|ft\.?).*?(?:\]|\))/gi, '').replace(/\s*\(.*?\)/g, '').replace(/\s*\[.*?\]/g, '').trim();
+
 
   return {
     id:           `yt_${videoId}`,

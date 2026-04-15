@@ -13,6 +13,7 @@ import Home from './pages/Home.jsx';
 import Search from './pages/Search.jsx';
 import Library from './pages/Library.jsx';
 import Playlist from './pages/Playlist.jsx';
+import Artist from './pages/Artist.jsx';
 
 function AppShell() {
   const { state } = usePlayer();
@@ -34,6 +35,7 @@ function AppShell() {
             <Route path="/search"       element={<Search />} />
             <Route path="/library"      element={<Library />} />
             <Route path="/playlist/:id" element={<Playlist />} />
+            <Route path="/artist/:name" element={<Artist />} />
             <Route path="*"             element={<Navigate to="/" replace />} />
           </Routes>
         </div>

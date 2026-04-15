@@ -1,7 +1,9 @@
-import React, {
+import {
   createContext, useContext, useReducer, useRef,
-  useEffect, useCallback,
+  useEffect, useCallback, useState,
 } from 'react';
+import { fetchRelated, searchYouTube } from '../services/youtube.js';
+
 
 // ─── Initial State ─────────────────────────────────────────
 const initialState = {
@@ -133,26 +135,73 @@ export function PlayerProvider({ children }) {
 
   const stopPoll = useCallback(() => clearInterval(progressRef.current), []);
 
-  // ── Internal next-track logic (used by onEnded) ──────────
-  const advanceQueue = useCallback(() => {
-    const { queue, queueIndex, shuffle, repeat } = stateRef.current;
+  const advanceQueue = useCallback(async () => {
+    const { queue, queueIndex, shuffle, repeat, currentSong } = stateRef.current;
     if (!queue.length) return;
     if (repeat === 'one') {
       ytPlayerRef.current?.seekTo(0, true);
       ytPlayerRef.current?.playVideo();
       return;
     }
+    
     let next;
+    let nextQueue = [...queue];
+
     if (shuffle) {
       next = Math.floor(Math.random() * queue.length);
     } else {
       next = queueIndex + 1;
+      
+      // Auto-play mood radio logic: fetch related if at the end
       if (next >= queue.length) {
-        if (repeat === 'all') next = 0;
-        else { stopPoll(); dispatch({ type: 'PAUSE' }); return; }
+        if (repeat === 'all') {
+          next = 0;
+        } else if (currentSong?.videoId && currentSong.source === 'youtube') {
+          try {
+            // New "Taste-based" DJ Engine
+            const artist = currentSong.artist || '';
+            const allLikedIds = Array.from(stateRef.current.likedSongs);
+            
+            // Randomly pick a liked artist to cross-pollinate the radio
+            const likedSongsAvailable = stateRef.current.songs.filter(s => allLikedIds.includes(s.id) && s.artist !== artist);
+            let randomLikedArtist = '';
+            if (likedSongsAvailable.length > 0) {
+              randomLikedArtist = likedSongsAvailable[Math.floor(Math.random() * likedSongsAvailable.length)].artist;
+            }
+
+            // Generate smart DJ query
+            let newTracks = [];
+            let djQuery = artist ? `${artist} songs` : '';
+            if (artist && randomLikedArtist) {
+              djQuery = `${artist} & ${randomLikedArtist} best audio`;
+            }
+
+            if (djQuery) {
+              const res = await searchYouTube(djQuery, 6);
+              newTracks = res.filter(r => !queue.some(q => q.id === r.id));
+            }
+
+            // Fallback to generic related if DJ failed
+            if (newTracks.length === 0) {
+              const related = await fetchRelated(currentSong.videoId, 5);
+              newTracks = related.filter(r => !queue.some(q => q.id === r.id));
+            }
+
+            if (newTracks.length > 0) {
+              nextQueue = [...queue, ...newTracks];
+            } else {
+              stopPoll(); dispatch({ type: 'PAUSE' }); return;
+            }
+          } catch {
+            stopPoll(); dispatch({ type: 'PAUSE' }); return;
+          }
+        } else {
+          stopPoll(); dispatch({ type: 'PAUSE' }); return;
+        }
       }
     }
-    dispatch({ type: 'PLAY', song: queue[next], queue, index: next });
+    
+    dispatch({ type: 'PLAY', song: nextQueue[next], queue: nextQueue, index: next });
   }, [stopPoll]);
 
   // ── YouTube player event handlers ────────────────────────

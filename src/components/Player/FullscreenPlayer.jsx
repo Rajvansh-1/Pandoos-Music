@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { usePlayer } from '../../context/PlayerContext.jsx';
 import { fetchLyrics } from '../../services/lyrics.js';
 import { formatDuration } from '../../services/youtube.js';
@@ -6,6 +7,7 @@ import LikeButton from '../UI/LikeButton.jsx';
 import SeekBar from './SeekBar.jsx';
 
 export default function FullscreenPlayer() {
+  const navigate = useNavigate();
   const { state, actions } = usePlayer();
   const { currentSong, isPlaying, shuffle, repeat, likedSongs, volume, isMuted, queue, queueIndex } = state;
 
@@ -81,7 +83,10 @@ export default function FullscreenPlayer() {
                 className="fullscreen-album-art"
                 src={currentSong.coverUrl}
                 alt={currentSong.title}
-                style={{ animation: isPlaying ? 'albumSpin 30s linear infinite' : 'none' }}
+                style={{
+                  animation: 'albumSpin 30s linear infinite',
+                  animationPlayState: isPlaying ? 'running' : 'paused'
+                }}
               />
             ) : (
               <div
@@ -107,7 +112,16 @@ export default function FullscreenPlayer() {
               <div className="fullscreen-title" style={{ fontSize:'clamp(1.25rem,4vw,1.75rem)' }}>
                 {currentSong.title}
               </div>
-              <div className="fullscreen-artist">{currentSong.artist}</div>
+              <div 
+                className="fullscreen-artist hover-link" 
+                onClick={() => {
+                  actions.toggleFullscreen();
+                  navigate(`/artist/${encodeURIComponent(currentSong.artist)}`);
+                }}
+                style={{ cursor: 'pointer', display: 'inline-block' }}
+              >
+                {currentSong.artist}
+              </div>
             </div>
             <LikeButton liked={isLiked} onClick={() => actions.toggleLike(currentSong.id)} size={26} />
           </div>
@@ -175,7 +189,7 @@ export default function FullscreenPlayer() {
 
       {/* ══════════ LYRICS TAB ══════════════════════════ */}
       {tab === 'lyrics' && (
-        <div style={{ width:'100%', maxWidth:500, flex:1, overflowY:'auto', padding:'0 var(--space-2)' }}>
+        <div style={{ width:'100%', maxWidth:500, flex:1, overflowY:'auto', padding:'0 var(--space-2)', scrollBehavior: 'smooth' }}>
           {lyricsStatus === 'loading' && (
             <div style={{ textAlign:'center', padding:'var(--space-10)', color:'var(--text-muted)' }}>
               <div style={{ fontSize:'2rem', animation:'pandaBounce 1s ease infinite' }}>🎵</div>
@@ -192,16 +206,40 @@ export default function FullscreenPlayer() {
             </div>
           )}
           {lyricsStatus === 'found' && lyrics && (
-            <div style={{
-              fontFamily:  'var(--font-body)',
-              fontSize:    '1rem',
-              lineHeight:  2.1,
-              color:       'var(--text-secondary)',
-              whiteSpace:  'pre-wrap',
-              padding:     'var(--space-2) var(--space-4)',
-              textAlign:   'center',
+            <div className="lyrics-container" style={{
+              display: 'flex', flexDirection: 'column', gap: 'var(--space-4)',
+              padding: 'var(--space-4) 0', textAlign: 'center'
             }}>
-              {lyrics}
+              {lyrics.synced && lyrics.synced.length > 0 ? (
+                lyrics.synced.map((line, i) => {
+                  const isPast = state.currentTime >= line.time;
+                  const isCurrent = isPast && (i === lyrics.synced.length - 1 || state.currentTime < lyrics.synced[i+1].time);
+                  
+                  return (
+                    <div 
+                      key={i} 
+                      className={`lyric-line${isCurrent ? ' active' : ''}`}
+                      style={{
+                        fontSize: isCurrent ? 'clamp(1.5rem, 4vw, 2rem)' : 'clamp(1rem, 3vw, 1.25rem)',
+                        fontWeight: isCurrent ? 800 : 600,
+                        color: isCurrent ? 'var(--brand-green)' : (isPast ? 'var(--text-primary)' : 'var(--text-muted)'),
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                        transform: isCurrent ? 'scale(1.05)' : 'scale(1)',
+                        filter: isCurrent ? 'none' : 'blur(0.5px)',
+                        opacity: isCurrent ? 1 : 0.5,
+                        lineHeight: 1.4
+                      }}
+                      ref={isCurrent ? el => { if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } : null}
+                    >
+                      {line.text}
+                    </div>
+                  );
+                })
+              ) : (
+                <div style={{ fontSize: '1rem', lineHeight: 2.1, color: 'var(--text-secondary)', whiteSpace: 'pre-wrap' }}>
+                  {lyrics.plain}
+                </div>
+              )}
             </div>
           )}
         </div>
