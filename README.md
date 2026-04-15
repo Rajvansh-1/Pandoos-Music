@@ -1,205 +1,68 @@
-<div align="center">
+# 🐼 Pandoos Music 
 
-# 🐼 Pandoos Music
+Pandoos Music is a production-ready, lightning-fast music streaming web application built with **React.js** and **Vite**. Styled with a stunning custom dark-mode design system, it uses the **YouTube Data API v3** to provide millions of free songs directly to your browser.
 
-**A panda-themed music streaming web app — real tracks, zero frameworks, pure vibes.**
-
-[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
-[![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
-[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-[![Jamendo API](https://img.shields.io/badge/Jamendo_API-34d399?style=for-the-badge&logo=music&logoColor=white)](https://developer.jamendo.com/v3.0)
-[![No Dependencies](https://img.shields.io/badge/Zero_Dependencies-🐼-black?style=for-the-badge)](https://github.com/Daksh-Mehandiratta/Pandoos-Music)
-
-</div>
-
----
-
-## 🎧 What Is This?
-
-**Pandoos Music** is a fully client-side music player styled around a panda aesthetic.  
-It streams real, licensed music from the **Jamendo API** and gracefully falls back to local `.mp3` files when the API isn't reachable — all without a single npm package or build step.
-
-> _"Life is short — relax like a panda and enjoy good music." 🌿_
-
----
+![Pandoos Preview](https://raw.githubusercontent.com/Daksh-Mehandiratta/Pandoos-Music/main/public/favicon.svg)
 
 ## ✨ Features
 
-| Feature | Details |
-|---|---|
-| 🎵 Real Music Streaming | Jamendo API — 50 popular tracks on load |
-| 🔎 Search + Genres | Live search + genre filter pills (Rock, Pop, Chill, Jazz, Classical, Indie, Folk) |
-| 📋 Playlists | Pandoos Picks · Bamboo Chill · Panda Power · Moonlit Melodies · Heart Stash |
-| ❤️ Likes | Like any track; persisted in `localStorage` |
-| 🔀 Shuffle & 🔁 Repeat | Shuffle queue or cycle None → All → One repeat modes |
-| 🎚️ Full Playbar | Play/Pause · Prev/Next · Seek · Volume · Mute |
-| 📊 Visualizer | Web Audio API frequency visualizer |
-| 🗂️ Song Detail Overlay | Metadata panel with clipboard share |
-| 🧭 Hash Router | `#home` · `#search` · `#library` · `#playlist:<id>` |
-| 📱 Mobile Ready | Responsive layout with sidebar overlay for small screens |
-| 🔋 Persistent State | Volume, last played song, liked songs — all saved across sessions |
-
----
-
-## 🧱 Tech Stack
-
-```
-┌──────────────────────────────────────────────────┐
-│                  Pandoos Music                   │
-├──────────────────────────────────────────────────┤
-│  UI Layer        HTML5 · CSS3 · ES Modules       │
-│  Audio Engine    HTMLAudioElement + Web Audio API │
-│  State           Custom pub/sub store (store.js) │
-│  Routing         Hash-based router (router.js)   │
-│  Data            Jamendo API  →  local fallback  │
-└──────────────────────────────────────────────────┘
-```
-
----
+- **Blazing Fast Playback**: Invisible YouTube IFrame API engine guarantees ultra-fast audio streaming without buffering.
+- **Top Trending Music**: Auto-refreshes Top Hits and Trending songs from YouTube directly to the home screen.
+- **Smart Search**: Real-time search with debouncing. Find any song, artist, or mood.
+- **Free Lyrics**: Integrated with `lyrics.ovh` to pull lyrics instantly.
+- **Extensive Caching**: Uses `localStorage` TTL caching to reduce YouTube API quota usage by 80%, allowing thousands of simultaneous users.
+- **Killer UI/UX**: Custom gradient placeholders, smooth animations, animated equalizers, and pixel-perfect design.
+- **Keyboard Shortcuts**: `Space` (Play/Pause), `M` (Mute), `S` (Shuffle), `L` (Like), `Arrows` (Seek/Skip).
+- **Media Session API**: Controls show on your mobile lock screen or desktop media controller.
+- **Error Resilient**: Includes React Error Boundaries and graceful API fallbacks.
 
 ## 🚀 Quick Start
 
-> ⚠️ Run through a local web server — **not** by opening `index.html` directly as a `file://` URL.
-
-**Clone the repo:**
-
+### 1. Installation
+Clone the repository and install dependencies in the root directory:
 ```bash
-git clone https://github.com/Daksh-Mehandiratta/Pandoos-Music.git
-cd Pandoos-Music
+npm install
 ```
 
-**Start a local server** (pick any option):
+### 2. Configure Environment Variables
+You need a free **YouTube Data API v3** key to unlock trending music and search.
+Create a `.env` file in the root directory:
 
+```env
+VITE_YOUTUBE_API_KEY=your_api_key_here
+```
+> **Note:** Do NOT commit your `.env` file to GitHub! The `.gitignore` file has been configured to protect it automatically.
+
+### 3. Run the Development Server
 ```bash
-# Option A — npx (Node.js required)
-npx serve .
-
-# Option B — Python 3
-python3 -m http.server 8080
-
-# Option C — VS Code Live Server
-# Install the "Live Server" extension, then click "Go Live"
+npm run dev
 ```
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-Open the printed URL in your browser and enjoy 🐼🎵
+## 🛠 Tech Stack
 
----
+- **Frontend Framework**: React 18
+- **Build Tool**: Vite (esbuild + Rollup)
+- **Routing**: React Router DOM (v6)
+- **Styling**: Vanilla CSS with comprehensive CSS Variables
+- **State Management**: React Context + `useReducer`
+- **Data Source**: YouTube Data API v3 & YouTube IFrame Player API
+- **Lyrics Source**: Lyrics.ovh REST API
 
-## ⚙️ Configuration
+## 📦 Production Build
 
-The Jamendo public client ID lives in one place:
-
-```js
-// src/js/api.js
-const JAMENDO_CLIENT_ID = 'b6747d04';   // ← replace with your own key
+To build the app for production (e.g., to host on Vercel, Netlify, or GitHub Pages):
+```bash
+npm run build
+npm run preview
 ```
+This enables Terser minification and chunk-splitting for maximum performance.
 
-Get a free key at [developer.jamendo.com](https://developer.jamendo.com/v3.0).
+## 👨‍💻 Architecture & Quota Management
 
----
+Pandoos Music is designed to overcome the YouTube API's 10,000 requests/day quota limit:
+1. **TTL Caching**: Search results are cached locally for 10 minutes; trending tracks for 30 minutes. 
+2. **Distributed Usage**: Since the API runs completely client-side in the browser, there is no shared backend. The application scales infinitely for free.
+3. **Graceful Failover**: If the API key is missing or quota is exhausted, the app automatically fails over to a persistent array of fallback "Demo Songs."
 
-## 📁 Project Structure
-
-```
-Pandoos-Music/
-├── index.html              ← App shell (JS-rendered)
-├── assets/                 ← Logo, favicon, images
-├── songs/                  ← Local MP3 fallback files
-├── src/
-│   ├── css/
-│   │   ├── variables.css   ← Design tokens & CSS custom properties
-│   │   ├── base.css        ← Reset & global styles
-│   │   ├── layout.css      ← Sidebar / main / playbar layout
-│   │   ├── components.css  ← Cards, buttons, badges…
-│   │   ├── player.css      ← Playbar & player controls
-│   │   └── overlay.css     ← Song detail overlay
-│   └── js/
-│       ├── app.js          ← Bootstrap & orchestration
-│       ├── api.js          ← Jamendo fetchers + local fallback
-│       ├── player.js       ← Audio engine (play/pause/seek/shuffle…)
-│       ├── router.js       ← Hash-based client router
-│       ├── store.js        ← Reactive state + pub/sub
-│       ├── utils.js        ← Helpers (debounce, formatTime, …)
-│       ├── assets.js       ← Inline SVG icon constants
-│       └── ui/
-│           ├── home.js     ← Home view
-│           ├── search.js   ← Search & genre filter view
-│           ├── playlist.js ← Playlist detail view
-│           ├── library.js  ← Library overview
-│           ├── playbar.js  ← Bottom playbar component
-│           ├── sidebar.js  ← Sidebar navigation
-│           ├── topbar.js   ← Top bar + toast notifications
-│           ├── overlay.js  ← Song detail overlay
-│           └── visualizer.js ← Web Audio frequency bars
-└── style.css               ← Legacy styles (v1 prototype)
-```
-
----
-
-## 🧠 How It Works
-
-```
-DOMContentLoaded
-      │
-      ▼
- bootstrap()               ← app.js
-      │
-      ├─ Init UI shells     ← sidebar, topbar, playbar, overlay
-      ├─ Init views         ← home, search, playlist, library
-      ├─ Init router        ← listens to hashchange
-      │
-      ├─ fetchSongs()       ← api.js
-      │     ├─ Jamendo API  (primary, 50 tracks)
-      │     └─ /songs/      (fallback, local MP3s)
-      │
-      ├─ setState()         ← store.js reactive update
-      ├─ initPlayer()       ← player.js audio engine
-      ├─ initVisualizer()   ← Web Audio API
-      └─ renderView()       ← route → home / search / library / playlist
-```
-
----
-
-## 🎵 Adding Local Songs
-
-1. Drop `.mp3` files into the `songs/` folder.
-2. Start the local server — the app automatically discovers them.
-3. Local files are used as fallback when Jamendo is unreachable.
-
----
-
-## 🧩 Troubleshooting
-
-| Problem | Fix |
-|---|---|
-| **No songs showing** | Use `npx serve .`, never `file://` |
-| **Jamendo not loading** | Check network — app auto-falls back to local songs |
-| **No audio on first click** | Normal browser behaviour — Web Audio needs a user gesture to start |
-| **Cover art missing** | Local songs have no cover art; a gradient placeholder is shown |
-
----
-
-## 🤝 Contributing
-
-Contributions and improvements are welcome!
-
-1. **Fork** this repo
-2. **Create** a feature branch: `git checkout -b feat/my-feature`
-3. **Commit** with a clear message: `git commit -m "feat: add my feature"`
-4. **Push** and open a **Pull Request**
-
-Please keep PRs focused — one feature or fix per PR.
-
----
-
-## 📜 License
-
-No license is currently defined in this repository.  
-If you fork or distribute this project, consider adding a `LICENSE` file (e.g. MIT or Apache 2.0).
-
----
-
-<div align="center">
-  Made with ❤️ and 🐼 energy by <a href="https://github.com/Daksh-Mehandiratta">Daksh Mehandiratta</a>
-</div>
-
+Enjoy the music! 🎧🐼

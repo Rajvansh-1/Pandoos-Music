@@ -3,65 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="description" content="Pandoos Library — Your personal panda-themed music universe. Discover, stream, and enjoy real music powered by Jamendo." />
-  <meta name="theme-color" content="#34d399" />
+  <meta name="description" content="Pandoos — The panda-powered music universe. Beat drops, good vibes, zero ads. Powered by Jamendo." />
+  <meta name="theme-color" content="#22c55e" />
   <meta name="color-scheme" content="dark" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta property="og:title" content="Pandoos Music 🐼" />
+  <meta property="og:description" content="Your panda-powered music universe. Real music, real vibes." />
+  <meta property="og:type" content="music.playlist" />
 
-  <!-- SEO -->
-  <title>Pandoos Library — Panda Music Universe 🐼</title>
+  <title>Pandoos Music 🐼</title>
 
-  <!-- Open Graph -->
-  <meta property="og:title"       content="Pandoos Library" />
-  <meta property="og:description" content="Your panda-themed personal music universe. Real music powered by Jamendo API." />
-  <meta property="og:type"        content="music.playlist" />
-
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="/assets/panda_favicon.png" />
   <link rel="apple-touch-icon" href="/assets/panda_favicon.png" />
 
-  <!-- Preconnect for Google Fonts & Jamendo -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preconnect" href="https://api.jamendo.com" />
-  <!-- Panda-themed fonts: Nunito (body) + Baloo 2 (display/headings) -->
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Baloo+2:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-
-  <!-- Design System (order matters) -->
-  <link rel="stylesheet" href="src/css/variables.css" />
-  <link rel="stylesheet" href="src/css/base.css" />
-  <link rel="stylesheet" href="src/css/layout.css" />
-  <link rel="stylesheet" href="src/css/components.css" />
-  <link rel="stylesheet" href="src/css/player.css" />
-  <link rel="stylesheet" href="src/css/overlay.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Baloo+2:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 </head>
 <body>
-
-  <!-- App Shell (populated entirely by JS) -->
-  <div id="app">
-    <!-- Sidebar -->
-    <aside id="sidebar" role="navigation" aria-label="Main navigation"></aside>
-
-    <!-- Main Area -->
-    <div id="main-wrapper">
-      <header id="topbar" role="banner"></header>
-      <main id="main-content" role="main" aria-live="polite" aria-atomic="false"></main>
-    </div>
-
-    <!-- Player Bar -->
-    <footer id="playbar" role="complementary" aria-label="Music player"></footer>
-  </div>
-
-  <!-- Mobile overlay -->
-  <div id="sidebar-overlay" role="presentation" aria-hidden="true"></div>
-
-  <!-- Toast notifications -->
-  <div id="toast-container" role="status" aria-live="polite" aria-atomic="true"></div>
-
-  <!-- App -->
-  <script type="module" src="src/js/app.js"></script>
-
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>
