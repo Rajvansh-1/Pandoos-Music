@@ -99,9 +99,9 @@
   --radius-xl:   30px;
   --radius-full: 9999px;
 
-  /* === Typography — warm, rounded, friendly === */
-  --font-sans:    'Plus Jakarta Sans', 'Nunito', system-ui, sans-serif;
-  --font-display: 'Syne', 'Plus Jakarta Sans', sans-serif;
+  /* === Typography — warm, rounded, panda-friendly === */
+  --font-sans:    'Nunito', system-ui, sans-serif;
+  --font-display: 'Baloo 2', 'Nunito', sans-serif;
   --font-mono:    'JetBrains Mono', monospace;
 
   --text-xs:   11px;

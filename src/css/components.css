@@ -2,6 +2,80 @@
    PANDOOS LIBRARY — Panda-Themed Components
    ===================================================== */
 
+/* =================== FULL-PAGE PANDA BACKGROUND =================== */
+
+/* The fixed background image layer — sits behind everything on home view */
+.panda-page-bg {
+  position: fixed;
+  inset: 0;
+  background: url('/assets/relax.jpeg') center / cover no-repeat;
+  filter: brightness(0.36) saturate(1.3);
+  transform: scale(1.04);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Dark gradient overlay so text stays readable */
+.panda-page-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(6, 10, 6, 0.42) 0%,
+    rgba(6, 10, 6, 0.22) 25%,
+    rgba(6, 10, 6, 0.32) 55%,
+    rgba(6, 10, 6, 0.72) 100%
+  );
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Floating ambient glow orbs */
+.panda-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(55px);
+  z-index: 0;
+  pointer-events: none;
+  animation: float 8s ease-in-out infinite;
+}
+.panda-orb-a {
+  width: 400px; height: 400px;
+  top: -100px; right: 4%;
+  background: radial-gradient(circle, rgba(108,194,87,0.2) 0%, transparent 70%);
+  animation-duration: 9s;
+}
+.panda-orb-b {
+  width: 280px; height: 280px;
+  bottom: 8%; left: 6%;
+  background: radial-gradient(circle, rgba(86,192,192,0.14) 0%, transparent 70%);
+  animation-duration: 11s;
+  animation-delay: 2s;
+}
+
+/* Content layer — sits above the fixed bg */
+.panda-page-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Glass card — semi-transparent backdrop so panda bg shows through */
+.glass-card {
+  background: rgba(14, 18, 13, 0.62) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-color: rgba(108, 194, 87, 0.14) !important;
+}
+.glass-card:hover {
+  background: rgba(20, 26, 18, 0.72) !important;
+  border-color: rgba(108, 194, 87, 0.3) !important;
+}
+
+/* When home view is active, override main-content bg so it stays transparent */
+#main-content.home-view {
+  background: transparent !important;
+}
+
 /* =================== PANDA LOGO SVG PIECE =================== */
 .panda-logo {
   display: flex;
@@ -281,8 +355,8 @@
 }
 .music-card:hover {
   transform: translateY(-5px) scale(1.01);
-  box-shadow: var(--shadow-panda), 0 0 28px var(--bamboo-glow-soft);
-  border-color: rgba(52,211,153,0.2);
+  box-shadow: var(--shadow-md), 0 0 32px var(--bamboo-glow-soft), 0 0 0 1.5px rgba(108,194,87,0.25);
+  border-color: rgba(108,194,87,0.28);
 }
 .music-card:hover .card-play-btn {
   opacity: 1;
@@ -324,13 +398,14 @@
 .card-art-fallback::after {
   content: '';
   position: absolute;
-  width: 28px;
-  height: 28px;
-  background: rgba(0,0,0,0.5);
+  width: 32px;
+  height: 32px;
+  background: rgba(0,0,0,0.75);
   border-radius: 50%;
+  border: 2px solid rgba(108,194,87,0.15);
 }
-.card-art-fallback::before { top: -8px; left: 14px; }
-.card-art-fallback::after  { top: -8px; right: 14px; }
+.card-art-fallback::before { top: -10px; left: 16px; }
+.card-art-fallback::after  { top: -10px; right: 16px; }
 
 /* Play button overlay */
 .card-play-btn {
@@ -578,13 +653,13 @@
   background: var(--gradient-hero);
   position: relative;
   overflow: hidden;
-  min-height: 220px;
+  min-height: 260px;
 }
 .hero-banner::after {
   content: '';
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  height: 100px;
+  height: 80px;
   background: linear-gradient(to bottom, transparent, var(--color-bg-primary));
   pointer-events: none;
 }

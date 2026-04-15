@@ -37,6 +37,12 @@ async function bootstrap() {
   initRouter();
   onRoute(({ view, params }) => {
     setState({ currentView: view, currentPlaylistId: params.id || null });
+    // Let CSS know which view is active (for home panda background etc.)
+    const app = document.getElementById('app');
+    if (app) app.setAttribute('data-view', view);
+    // Also remove home-view class from main-content when navigating away
+    const mc = document.getElementById('main-content');
+    if (mc) mc.classList.remove('home-view');
     _renderView(view, params.id);
   });
 

@@ -13,6 +13,14 @@
   position: relative;
 }
 
+/* On home view, make app background transparent so panda bg shows through */
+#app[data-view="home"] {
+  background: transparent;
+}
+#app[data-view="home"] #main-wrapper {
+  background: transparent;
+}
+
 /* Background ambient dots */
 #app::before {
   content: '';

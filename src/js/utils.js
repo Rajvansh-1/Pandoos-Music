@@ -86,16 +86,18 @@ export function hashCode(str) {
  */
 export function generateGradient(seed) {
   const palettes = [
-    ['#2d5a27', '#4ea63c'],  // meadow green
-    ['#1a4a3a', '#3da6a6'],  // forest teal
-    ['#3a2a15', '#8a6240'],  // earthy panda brown
-    ['#1e3a1a', '#6cc257'],  // bright meadow
-    ['#0d2b2b', '#56c0c0'],  // deep teal
-    ['#2a1a10', '#c47c3a'],  // warm amber
-    ['#1a2a1a', '#8ed87a'],  // light meadow
-    ['#1e2a10', '#a3d45a'],  // yellow-green
-    ['#0a1f0a', '#4ea63c'],  // dark forest
-    ['#251a0a', '#c4843a'],  // amber sunset
+    ['#0c1a0d', '#6cc257'],  // panda forest green
+    ['#0d1f1f', '#56c0c0'],  // panda teal
+    ['#1a1a1a', '#8ed87a'],  // panda black to meadow
+    ['#0f1a10', '#4ea63c'],  // deep forest to bright green
+    ['#1c1e1b', '#7fd4d4'],  // charcoal to teal bright
+    ['#14120c', '#c4843a'],  // panda dark to amber
+    ['#0c0f0b', '#a3d45a'],  // panda black to yellow-green
+    ['#111818', '#3da6a6'],  // dark teal gradient
+    ['#1a1208', '#e8c44a'],  // dark warm to flower yellow
+    ['#0a140a', '#8ed87a'],  // darkest green to bright meadow
+    ['#161010', '#c47c3a'],  // panda dark earth
+    ['#0c0f1a', '#56c0c0'],  // midnight teal
   ];
   const idx = hashCode(seed) % palettes.length;
   const [a, b] = palettes[idx];
