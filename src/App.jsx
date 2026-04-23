@@ -5,6 +5,7 @@ import Sidebar from './components/Layout/Sidebar.jsx';
 import PlayerBar from './components/Player/PlayerBar.jsx';
 import FullscreenPlayer from './components/Player/FullscreenPlayer.jsx';
 import MiniPlayer from './components/Player/MiniPlayer.jsx';
+import YouTubePlayer from './components/Player/YouTubePlayer.jsx';
 import Home from './pages/Home.jsx';
 import Search from './pages/Search.jsx';
 import Library from './pages/Library.jsx';
@@ -52,61 +53,62 @@ function MobileNav() {
 export default function App() {
   const { state } = usePlayer();
 
-  // Ensure iframe is completely hidden
-  useEffect(() => {
-    const iframe = document.getElementById('yt-player-iframe');
-    if (iframe) {
-      iframe.style.position = 'absolute';
-      iframe.style.left = '-9999px';
-      iframe.style.width = '1px';
-      iframe.style.height = '1px';
-      iframe.style.opacity = '0';
-      iframe.style.pointerEvents = 'none';
-    }
-  }, []);
-
   return (
-    <div className="app-layout">
-      {/* ── Internal Audio Engine (Hidden) ── */}
-      <div id="yt-player-container" style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden', opacity: 0, pointerEvents: 'none' }}>
-        <div id="yt-player-iframe"></div>
+    /*
+     * LAYOUT ARCHITECTURE (Spotify pattern):
+     *
+     *  .app-shell  ← flex column, fills 100dvh
+     *  ├── .app-layout  ← grid (sidebar | main), flex:1 grows to fill space
+     *  │   ├── <Sidebar>
+     *  │   └── <main.main-area>
+     *  └── <PlayerBar>  ← natural flex child, locked 90px height at bottom
+     *
+     *  No position:fixed needed — zero clipping issues.
+     */
+    <div className="app-shell">
+      {/* Hidden audio engine */}
+      <YouTubePlayer />
+
+      {/* Sidebar + Main content grid */}
+      <div className="app-layout">
+        <Sidebar />
+
+        <main className="main-area">
+          <header className="topbar">
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button className="topbar-btn" onClick={() => window.history.back()} aria-label="Go back">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <button className="topbar-btn" onClick={() => window.history.forward()} aria-label="Go forward">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+            </div>
+            <div className="user-avatar" title="Your Profile">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+          </header>
+
+          <div className="page-content" id="scrollable-content">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/library" element={<Library />} />
+              <Route path="/playlist/:id" element={<Playlist />} />
+              <Route path="/artist/:name" element={<Artist />} />
+              <Route path="/stats" element={<Stats />} />
+            </Routes>
+          </div>
+        </main>
       </div>
 
-      <Sidebar />
-
-      <main className="main-area">
-        <header className="topbar">
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button className="topbar-btn" onClick={() => window.history.back()} aria-label="Go back">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M15 18l-6-6 6-6"/></svg>
-            </button>
-            <button className="topbar-btn" onClick={() => window.history.forward()} aria-label="Go forward">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M9 18l6-6-6-6"/></svg>
-            </button>
-          </div>
-          
-          {/* User profile / Premium indicator */}
-          <div className="user-avatar" title="Your Profile">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </div>
-        </header>
-
-        <div className="page-content" id="scrollable-content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/library" element={<Library />} />
-            <Route path="/playlist/:id" element={<Playlist />} />
-            <Route path="/artist/:name" element={<Artist />} />
-            <Route path="/stats" element={<Stats />} />
-          </Routes>
-        </div>
-      </main>
-
+      {/* Player bar: second flex child — always visible at the bottom */}
       <PlayerBar />
+
+      {/* Mobile-only overlays */}
       <MiniPlayer />
       <MobileNav />
 
+      {/* Fullscreen player + toasts */}
       {state.showFullscreen && <FullscreenPlayer />}
       <ToastContainer />
     </div>

@@ -14,10 +14,18 @@ export default function FullscreenPlayer() {
   const [lyrics, setLyrics] = useState(null);
   const [lyricsStatus, setLyricsStatus] = useState('idle'); // idle | loading | found | not-found
   const [closing, setClosing] = useState(false);
+  const [activeTab, setActiveTab] = useState('info'); // 'info' | 'lyrics'
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1024);
   const lyricsContainerRef = useRef(null);
   const activeLyricRef = useRef(null);
 
   const isLiked = currentSong ? likedSongs.has(currentSong.id) : false;
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // ── Fetch Lyrics ────────────────────────────────────────────────
   useEffect(() => {
@@ -80,26 +88,45 @@ export default function FullscreenPlayer() {
           <div style={{ width: 32 }} />
         </div>
 
+        {/* ── Mobile Tabs Switcher ── */}
+        <div className="fs-mobile-tabs">
+          <button 
+            className={`fs-tab-btn ${activeTab === 'info' ? 'active' : ''}`}
+            onClick={() => setActiveTab('info')}
+          >
+            Song Info
+          </button>
+          <button 
+            className={`fs-tab-btn ${activeTab === 'lyrics' ? 'active' : ''}`}
+            onClick={() => setActiveTab('lyrics')}
+          >
+            Lyrics
+          </button>
+        </div>
+
         {/* ── Main (Art + Lyrics) ── */}
         <div className="fs-main">
           {/* Left: Cinematic Art Container */}
-          <div className="fs-art-container">
-            <div className={`fs-vinyl-record ${isPlaying ? 'spinning' : 'paused'}`}>
-              <div className="vinyl-grooves"></div>
-              <img 
-                src={currentSong.coverUrl || ''} 
-                alt={currentSong.title} 
-                className="fs-vinyl-label"
-              />
+          {(!isMobile || activeTab === 'info') && (
+            <div className="fs-art-container">
+              <div className={`fs-vinyl-record ${isPlaying ? 'spinning' : ''}`}>
+                <div className="vinyl-grooves"></div>
+                <img 
+                  src={currentSong.coverUrl || ''} 
+                  alt={currentSong.title} 
+                  className="fs-vinyl-label"
+                />
+              </div>
+              {/* Playback Needle */}
+              <div className={`fs-vinyl-needle ${isPlaying ? 'playing' : ''}`}>
+                 {/* Needle visual made with CSS in FullscreenPlayer.css */}
+              </div>
             </div>
-            {/* Playback Needle */}
-            <div className={`fs-vinyl-needle ${isPlaying ? 'playing' : ''}`}>
-               {/* Needle visual made with CSS in FullscreenPlayer.css */}
-            </div>
-          </div>
+          )}
 
           {/* Right: Karaoke Lyrics */}
-          <div className="fs-lyrics-container" ref={lyricsContainerRef}>
+          {(!isMobile || activeTab === 'lyrics') && (
+            <div className="fs-lyrics-container" ref={lyricsContainerRef}>
             {lyricsStatus === 'loading' && (
               <div className="lyrics-loading">
                 <div className="lyrics-skeleton"></div>
@@ -138,6 +165,7 @@ export default function FullscreenPlayer() {
               </div>
             ) : null}
           </div>
+          )}
         </div>
 
         {/* ── Bottom Controls ── */}

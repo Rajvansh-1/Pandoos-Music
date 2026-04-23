@@ -21,7 +21,7 @@ export default function PlayerBar() {
       )}
 
       {/* ── Left: Now Playing ── */}
-      <div className="pb-info" style={{ zIndex: 10 }}>
+      <div className="pb-info" style={{ zIndex: 10 }} onClick={actions.toggleFullscreen}>
         {currentSong ? (
           <>
             {currentSong.coverUrl ? (
@@ -29,13 +29,11 @@ export default function PlayerBar() {
                 className="pb-art luxury-art"
                 src={currentSong.coverUrl}
                 alt={currentSong.title}
-                onClick={actions.toggleFullscreen}
               />
             ) : (
               <div
                 className="pb-art luxury-art"
                 style={{ background: 'var(--bg-active)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}
-                onClick={actions.toggleFullscreen}
               >
                 🎵
               </div>
@@ -44,7 +42,9 @@ export default function PlayerBar() {
               <div className="card-title pb-title" title={currentSong.title}>{currentSong.title}</div>
               <div className="card-subtitle pb-subtitle" title={currentSong.artist}>{currentSong.artist}</div>
             </div>
-            <LikeButton liked={isLiked} onClick={() => actions.toggleLike(currentSong.id)} size={28} />
+            <div onClick={e => e.stopPropagation()}>
+              <LikeButton liked={isLiked} onClick={() => actions.toggleLike(currentSong.id)} size={28} />
+            </div>
           </>
         ) : (
           <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem', fontWeight: 600 }}>
@@ -85,8 +85,8 @@ export default function PlayerBar() {
           <ExpandIcon />
         </button>
         
-        <div className="volume-bar" style={{ width: 120, marginLeft: 8 }}>
-          <button className="icon-btn" onClick={actions.toggleMute} style={{ width: 24, height: 24 }}>
+        <div className="volume-bar">
+          <button className="icon-btn" onClick={actions.toggleMute}>
             {isMuted || volume === 0 ? <MuteIcon /> : volume < 0.5 ? <VolumeLowIcon /> : <VolumeIcon />}
           </button>
           <input
@@ -96,7 +96,7 @@ export default function PlayerBar() {
             onChange={e => actions.setVolume(parseFloat(e.target.value))}
             className="volume-slider"
             style={{
-              background: `linear-gradient(to right, var(--ambient-primary) ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.1) ${(isMuted ? 0 : volume) * 100}%)`
+              background: `linear-gradient(to right, var(--ambient-primary, #4ade80) ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.12) ${(isMuted ? 0 : volume) * 100}%)`
             }}
           />
         </div>

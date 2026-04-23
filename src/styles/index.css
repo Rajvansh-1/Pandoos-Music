@@ -54,7 +54,17 @@ body {
   color: var(--text-primary);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  overflow: hidden; /* App handles scrolling */
+  overflow: hidden;
+  height: 100vh;
+  height: 100dvh;
+}
+
+#root {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -78,16 +88,24 @@ input { font: inherit; outline: none; }
   text-shadow: 0 0 12px var(--ambient-glow);
 }
 
-/* ── APP LAYOUT ── */
+/* ── APP SHELL (flex column — Spotify pattern) ── */
+/* app-shell = flex column: [app-layout grows] + [player-bar fixed height] */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ── APP LAYOUT (sidebar + main grid) ── */
 .app-layout {
   display: grid;
-  grid-template-areas: 
-    "sidebar main"
-    "player player";
+  grid-template-areas: "sidebar main";
   grid-template-columns: 240px 1fr;
-  grid-template-rows: 1fr 90px;
-  height: 100vh;
-  position: relative;
+  grid-template-rows: 1fr;
+  flex: 1;          /* takes all space above the player bar */
+  min-height: 0;    /* crucial: allows grid to shrink inside flex */
   overflow: hidden;
 }
 
@@ -95,7 +113,6 @@ input { font: inherit; outline: none; }
   .app-layout {
     grid-template-areas: "main";
     grid-template-columns: 1fr;
-    grid-template-rows: 1fr;
   }
 }
 
@@ -249,14 +266,42 @@ input { font: inherit; outline: none; }
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(0,0,0,0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.05);
+  transition: background 0.2s;
 }
-.topbar-btn:hover { background: rgba(0,0,0,0.8); }
+
+.topbar-btn:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.05);
+  transform: scale(1.1);
+}
+
+.icon-btn.active {
+  color: var(--ambient-primary, var(--brand-green));
+}
+
+.topbar-btn:hover { background: rgba(255,255,255,0.1); }
 
 .user-avatar {
   width: 36px;
@@ -276,6 +321,7 @@ input { font: inherit; outline: none; }
   overflow-x: hidden;
   position: relative;
   z-index: 1;
+  padding-bottom: 100px;
 }
 
 .content-section {
