@@ -180,41 +180,48 @@ export async function fetchLyrics(artist, title, duration) {
 }
 
 async function raceLyricsSources(artist, title, duration) {
-  // Create abort controller for timeout
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
-  
-  try {
-    // Fire all sources simultaneously
-    const promises = [
-      fetchFromLRCLibExact(artist, title, duration).catch(() => null),
-      fetchFromLRCLibSearch(artist, title).catch(() => null),
-      fetchFromLyricsOvh(artist, title).catch(() => null),
-    ];
-
-    // Strategy: wait for all, prefer synced
-    const results = await Promise.allSettled(promises);
-    
-    let bestSynced = null;
+  // TRUE RACE: First synced result wins instantly.
+  return new Promise((resolve) => {
+    let resolved = false;
+    let fallbackTimer = null;
     let bestPlain = null;
-    
-    for (const r of results) {
-      if (r.status !== 'fulfilled' || !r.value) continue;
-      const val = r.value;
+    let completedCount = 0;
+    const sourcesCount = 3;
+
+    const finalize = (result) => {
+      if (resolved) return;
+      resolved = true;
+      if (fallbackTimer) clearTimeout(fallbackTimer);
+      resolve(result || { plain: null, synced: [] });
+    };
+
+    const handleResult = (val) => {
+      if (resolved) return;
+      completedCount++;
       
-      if (val.synced && val.synced.length > 0 && !bestSynced) {
-        bestSynced = val;
+      if (val && val.synced && val.synced.length > 0) {
+        // INSTANT WIN for Synced Lyrics
+        finalize(val);
+      } else if (val && val.plain) {
+        if (!bestPlain) bestPlain = val;
       }
-      if (val.plain && !bestPlain) {
-        bestPlain = val;
+
+      // If all sources finished and no synced was found
+      if (completedCount === sourcesCount) {
+        finalize(bestPlain);
       }
-    }
-    
-    // Synced > Plain > null
-    return bestSynced || bestPlain || { plain: null, synced: [] };
-  } finally {
-    clearTimeout(timeout);
-  }
+    };
+
+    // Fire all sources
+    fetchFromLRCLibExact(artist, title, duration).then(handleResult).catch(() => handleResult(null));
+    fetchFromLRCLibSearch(artist, title).then(handleResult).catch(() => handleResult(null));
+    fetchFromLyricsOvh(artist, title).then(handleResult).catch(() => handleResult(null));
+
+    // Hard timeout: 5 seconds. Return best plain if we have it, else null.
+    fallbackTimer = setTimeout(() => {
+      if (!resolved) finalize(bestPlain);
+    }, 5000);
+  });
 }
 
 /**

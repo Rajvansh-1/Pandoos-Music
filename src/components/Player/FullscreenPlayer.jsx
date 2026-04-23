@@ -4,6 +4,7 @@ import { usePlayer } from '../../context/PlayerContext.jsx';
 import { fetchLyrics } from '../../services/lyrics.js';
 import LikeButton from '../UI/LikeButton.jsx';
 import SeekBar from './SeekBar.jsx';
+import './FullscreenPlayer.css';
 
 export default function FullscreenPlayer() {
   const navigate = useNavigate();
@@ -34,9 +35,13 @@ export default function FullscreenPlayer() {
   // ── Auto-scroll Lyrics ──────────────────────────────────────────
   useEffect(() => {
     if (activeLyricRef.current && lyricsContainerRef.current) {
-      activeLyricRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
+      const container = lyricsContainerRef.current;
+      const activeEl = activeLyricRef.current;
+      const offsetTop = activeEl.offsetTop - container.offsetTop;
+      
+      container.scrollTo({
+        top: offsetTop - container.clientHeight / 2 + activeEl.clientHeight / 2,
+        behavior: 'smooth'
       });
     }
   }, [state.currentTime]);
@@ -52,64 +57,83 @@ export default function FullscreenPlayer() {
     <div className={`fullscreen-player${closing ? ' closing' : ''}`}>
       {/* ── Ambient Backgrounds ── */}
       {currentSong.coverUrl && (
-        <img src={currentSong.coverUrl} alt="Background" className="fs-bg-media" />
+        <div className="fs-bg-media-container">
+          <img src={currentSong.coverUrl} alt="Background" className="fs-bg-media" />
+        </div>
       )}
       <div className="fs-overlay" />
+
+      {/* ── CSS Particles ── */}
+      <div className="fs-particles"></div>
 
       <div className="fs-content">
         {/* ── Header ── */}
         <div className="fs-header">
-          <button className="icon-btn" onClick={handleClose} aria-label="Close">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+          <button className="icon-btn close-btn" onClick={handleClose} aria-label="Close">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </button>
-          <span className="ambient-text" style={{ fontSize: '0.875rem', fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-            Now Playing
+          <span className="ambient-text fs-now-playing-label">
+            NOW PLAYING FROM {currentSong.source.toUpperCase()}
           </span>
           <div style={{ width: 32 }} />
         </div>
 
         {/* ── Main (Art + Lyrics) ── */}
         <div className="fs-main">
-          {/* Left: Vinyl Art */}
+          {/* Left: Cinematic Art Container */}
           <div className="fs-art-container">
-            <img 
-              src={currentSong.coverUrl || ''} 
-              alt={currentSong.title} 
-              className={`fs-art ${isPlaying ? 'is-playing' : ''}`}
-            />
+            <div className={`fs-vinyl-record ${isPlaying ? 'spinning' : 'paused'}`}>
+              <div className="vinyl-grooves"></div>
+              <img 
+                src={currentSong.coverUrl || ''} 
+                alt={currentSong.title} 
+                className="fs-vinyl-label"
+              />
+            </div>
+            {/* Playback Needle */}
+            <div className={`fs-vinyl-needle ${isPlaying ? 'playing' : ''}`}>
+               {/* Needle visual made with CSS in FullscreenPlayer.css */}
+            </div>
           </div>
 
           {/* Right: Karaoke Lyrics */}
           <div className="fs-lyrics-container" ref={lyricsContainerRef}>
             {lyricsStatus === 'loading' && (
-              <div style={{ textAlign: 'center', opacity: 0.5 }}>Loading lyrics...</div>
+              <div className="lyrics-loading">
+                <div className="lyrics-skeleton"></div>
+                <div className="lyrics-skeleton w-80"></div>
+                <div className="lyrics-skeleton w-60"></div>
+              </div>
             )}
             {lyricsStatus === 'not-found' && (
-              <div style={{ textAlign: 'center', opacity: 0.5, fontSize: '1.5rem' }}>
-                Instrumental or Lyrics not found
+              <div className="lyrics-empty">
+                <div className="lyrics-empty-icon">🎵</div>
+                <p>Instrumental or Lyrics not found</p>
+                <span className="lyrics-empty-sub">Enjoy the pure music</span>
               </div>
             )}
             {lyricsStatus === 'found' && lyrics && lyrics.synced.length > 0 ? (
-              lyrics.synced.map((line, i) => {
-                const isPast = state.currentTime >= line.time;
-                const isCurrent = isPast && (i === lyrics.synced.length - 1 || state.currentTime < lyrics.synced[i+1].time);
-                
-                return (
-                  <div 
-                    key={i}
-                    ref={isCurrent ? activeLyricRef : null}
-                    className={`fs-lyric-line ${isCurrent ? 'active' : isPast ? 'past' : ''}`}
-                    onClick={() => actions.seek(line.time / state.duration)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    {line.text}
-                  </div>
-                );
-              })
+              <div className="lyrics-synced-wrapper">
+                {lyrics.synced.map((line, i) => {
+                  const isPast = state.currentTime >= line.time;
+                  const isCurrent = isPast && (i === lyrics.synced.length - 1 || state.currentTime < lyrics.synced[i+1].time);
+                  
+                  return (
+                    <div 
+                      key={i}
+                      ref={isCurrent ? activeLyricRef : null}
+                      className={`fs-lyric-line ${isCurrent ? 'active' : isPast ? 'past' : ''}`}
+                      onClick={() => actions.seek(line.time / state.duration)}
+                    >
+                      {line.text || "♪"}
+                    </div>
+                  );
+                })}
+              </div>
             ) : lyricsStatus === 'found' && lyrics && lyrics.plain ? (
-              <div style={{ whiteSpace: 'pre-wrap', fontSize: '1.25rem', color: 'rgba(255,255,255,0.7)', lineHeight: 2 }}>
+              <div className="lyrics-plain">
                 {lyrics.plain}
               </div>
             ) : null}
@@ -120,11 +144,10 @@ export default function FullscreenPlayer() {
         <div className="fs-bottom">
           <div className="fs-info">
             <div>
-              <div className="fs-title">{currentSong.title}</div>
+              <div className="fs-title" title={currentSong.title}>{currentSong.title}</div>
               <div 
                 className="fs-artist" 
                 onClick={() => { handleClose(); navigate(`/artist/${encodeURIComponent(currentSong.artist)}`); }}
-                style={{ cursor: 'pointer' }}
               >
                 {currentSong.artist}
               </div>
@@ -135,19 +158,19 @@ export default function FullscreenPlayer() {
           <SeekBar />
 
           <div className="fs-controls">
-            <button className={`icon-btn ${shuffle ? 'active' : ''}`} onClick={actions.toggleShuffle}>
+            <button className={`icon-btn fs-control-btn ${shuffle ? 'active' : ''}`} onClick={actions.toggleShuffle}>
               <ShuffleIcon />
             </button>
-            <button className="icon-btn" onClick={actions.prevTrack}>
+            <button className="icon-btn fs-control-btn" onClick={actions.prevTrack}>
               <PrevIcon />
             </button>
-            <button className="fs-btn-play" onClick={actions.togglePlay}>
+            <button className="fs-btn-play luxury-play" onClick={actions.togglePlay}>
               {isPlaying ? <PauseIcon /> : <PlayIcon />}
             </button>
-            <button className="icon-btn" onClick={actions.nextTrack}>
+            <button className="icon-btn fs-control-btn" onClick={actions.nextTrack}>
               <NextIcon />
             </button>
-            <button className={`icon-btn ${repeat !== 'none' ? 'active' : ''}`} onClick={actions.cycleRepeat}>
+            <button className={`icon-btn fs-control-btn ${repeat !== 'none' ? 'active' : ''}`} onClick={actions.cycleRepeat}>
               {repeat === 'one' ? <RepeatOneIcon /> : <RepeatIcon />}
             </button>
           </div>
@@ -165,20 +188,20 @@ const PrevIcon  = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="cu
 const NextIcon  = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>;
 
 function ShuffleIcon() {
-  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+  return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
     <polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/>
     <polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/>
     <line x1="4" y1="4" x2="9" y2="9"/>
   </svg>;
 }
 function RepeatIcon() {
-  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+  return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
     <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/>
     <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/>
   </svg>;
 }
 function RepeatOneIcon() {
-  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+  return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
     <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/>
     <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/>
     <path d="M11 10h1v4" strokeLinecap="round"/>

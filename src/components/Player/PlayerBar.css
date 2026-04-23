@@ -1,0 +1,99 @@
+.luxury-player-bar {
+  height: 100px;
+  background: rgba(4, 4, 6, 0.85);
+  backdrop-filter: blur(40px);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  position: relative;
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
+}
+
+.pb-visualizer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 20%;
+  opacity: 0.1;
+  pointer-events: none;
+  z-index: 1;
+  mask-image: linear-gradient(to top, black 0%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to top, black 0%, transparent 100%);
+}
+
+.pb-vis-bar {
+  flex: 1;
+  background: var(--ambient-primary);
+  border-radius: 4px 4px 0 0;
+  animation: visualize 1s infinite ease-in-out alternate;
+  min-height: 10%;
+}
+
+@keyframes visualize {
+  0% { height: 10%; }
+  100% { height: 100%; }
+}
+
+.luxury-art {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.luxury-art:hover {
+  transform: scale(1.05);
+}
+
+.pb-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.pb-subtitle {
+  font-size: 0.9rem;
+}
+
+.luxury-play-sm {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(255,255,255,0.2);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.luxury-play-sm:hover {
+  transform: scale(1.1);
+}
+
+.volume-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  outline: none;
+  transition: background 0.2s;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
