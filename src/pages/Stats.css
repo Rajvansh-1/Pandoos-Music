@@ -1,0 +1,230 @@
+.stats-container {
+  padding-bottom: 120px;
+}
+
+.stats-hero {
+  padding: 100px 48px 80px;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+
+.stats-hero-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top, rgba(74, 222, 128, 0.2) 0%, transparent 60%);
+  z-index: 0;
+  animation: pulseBeat 4s infinite alternate;
+}
+
+.stats-hero-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stats-panda {
+  margin-bottom: 24px;
+  animation: float 6s ease-in-out infinite;
+}
+
+.stats-title {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 6vw, 4.5rem);
+  font-weight: 900;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #fff, rgba(255,255,255,0.5));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.02em;
+}
+
+.stats-subtitle {
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.stats-card {
+  position: relative;
+  padding: 32px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: rgba(4,4,6,0.6);
+  backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.stats-card:hover {
+  transform: translateY(-8px);
+}
+
+.stats-card-bg {
+  position: absolute;
+  inset: 0;
+  opacity: 0.1;
+  z-index: 0;
+  transition: opacity 0.4s ease;
+}
+
+.stats-card:hover .stats-card-bg {
+  opacity: 0.2;
+}
+
+.streak-bg { background: radial-gradient(circle at top right, #fb923c, transparent 70%); }
+.plays-bg { background: radial-gradient(circle at top right, #38bdf8, transparent 70%); }
+.liked-bg { background: radial-gradient(circle at top right, #f472b6, transparent 70%); }
+
+.stats-card-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+}
+
+.stats-icon {
+  font-size: 3.5rem;
+}
+
+.stats-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 4px;
+}
+
+.stats-value {
+  font-family: var(--font-display);
+  font-size: 3.5rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #fff;
+}
+
+.stats-unit {
+  font-size: 1.25rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.stats-msg {
+  font-size: 0.95rem;
+  margin-top: auto;
+  font-weight: 500;
+}
+
+.text-secondary { color: var(--text-secondary); }
+.text-green { color: var(--brand-green); font-weight: 700; }
+
+.premium-border {
+  border: 1px solid var(--border-glass);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+.stats-top-songs {
+  background: var(--bg-surface);
+  border-radius: var(--radius-xl);
+  padding: 16px;
+}
+
+.stats-song-row {
+  display: grid;
+  grid-template-columns: 40px 56px 1fr auto;
+  gap: 24px;
+  align-items: center;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  transition: background 0.3s ease;
+  border-bottom: 1px solid rgba(255,255,255,0.02);
+}
+
+.stats-song-row:last-child {
+  border-bottom: none;
+}
+
+.stats-song-row:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.stats-song-rank {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.stats-song-art {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.stats-song-info {
+  min-width: 0;
+}
+
+.stats-song-title {
+  font-weight: 800;
+  font-size: 1.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.stats-song-artist {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.stats-song-plays {
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  color: var(--ambient-primary);
+  font-weight: 700;
+  background: rgba(74, 222, 128, 0.1);
+  padding: 6px 12px;
+  border-radius: var(--radius-round);
+}
+
+.stats-empty {
+  padding: 60px;
+  text-align: center;
+  background: var(--bg-surface);
+  border-radius: var(--radius-xl);
+}
+
+.stats-empty-title {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.stats-empty-desc {
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.luxury-btn-sm {
+  padding: 12px 24px;
+  font-size: 1rem;
+}

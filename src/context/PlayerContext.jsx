@@ -21,6 +21,7 @@ const initialState = {
   currentTime:  0,
   duration:     0,
   volume:       0.8,
+  playbackRate: 1,
   isMuted:      false,
   shuffle:      false,
   repeat:       'none',    // 'none' | 'one' | 'all'
@@ -96,6 +97,7 @@ function reducer(state, action) {
       return { ...state, ambientColors: action.colors };
 
     case 'SET_VOLUME':   return { ...state, volume: action.volume, isMuted: false };
+    case 'SET_PLAYBACK_RATE': return { ...state, playbackRate: action.rate };
     case 'TOGGLE_MUTE':  return { ...state, isMuted: !state.isMuted };
 
     case 'TOGGLE_SHUFFLE': return { ...state, shuffle: !state.shuffle };
@@ -255,6 +257,7 @@ export function PlayerProvider({ children }) {
     window.__pandoosOnReady = () => {
       dispatch({ type: 'PLAYER_READY' });
       ytPlayerRef.current?.setVolume(Math.round(stateRef.current.volume * 100));
+      ytPlayerRef.current?.setPlaybackRate(stateRef.current.playbackRate);
     };
     window.__pandoosOnStateChange = (ytState) => {
       if (ytState === 1) {          // PLAYING
@@ -286,6 +289,14 @@ export function PlayerProvider({ children }) {
     if (state.isMuted) p.mute();
     else { p.unMute(); p.setVolume(Math.round(state.volume * 100)); }
   }, [state.volume, state.isMuted]);
+
+  useEffect(() => {
+    const p = ytPlayerRef.current;
+    if (p && p.setPlaybackRate) {
+      p.setPlaybackRate(state.playbackRate);
+    }
+  }, [state.playbackRate, state.currentSong?.id]); // Re-apply on song change
+
 
   useEffect(() => {
     if (!state.currentSong || !('mediaSession' in navigator)) return;
@@ -347,6 +358,7 @@ export function PlayerProvider({ children }) {
       if (dur) ytPlayerRef.current?.seekTo(Math.max(0, Math.min(1, ratio)) * dur, true);
     }, []),
     setVolume:     useCallback((v) => dispatch({ type: 'SET_VOLUME', volume: Math.max(0, Math.min(1, v)) }), []),
+    setPlaybackRate: useCallback((rate) => dispatch({ type: 'SET_PLAYBACK_RATE', rate }), []),
     toggleMute:    useCallback(() => dispatch({ type: 'TOGGLE_MUTE' }), []),
     toggleShuffle: useCallback(() => dispatch({ type: 'TOGGLE_SHUFFLE' }), []),
     cycleRepeat:   useCallback(() => {
