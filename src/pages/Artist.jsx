@@ -24,7 +24,7 @@ export default function Artist() {
     setLoading(true);
     setError(false);
 
-    // Search youtube specifically for this artist
+    // Search for this artist's tracks
     searchYouTube(`${decodedName} songs`, 20)
       .then(res => {
         setSongs(res);
@@ -42,7 +42,7 @@ export default function Artist() {
       <div className="empty-state">
         <div className="empty-icon">🐼</div>
         <div className="empty-title">API Key Required</div>
-        <div className="empty-desc">Artist profiles require a YouTube API key to fetch songs.</div>
+        <div className="empty-desc">Artist profiles require an API key to fetch songs.</div>
       </div>
     );
   }

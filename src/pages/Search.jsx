@@ -1,142 +1,124 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { usePlayer } from '../context/PlayerContext.jsx';
 import { searchYouTube, DEMO_SONGS } from '../services/youtube.js';
-import { APP_CONFIG, GENRE_CARDS } from '../config.js';
-import { showToast } from '../components/UI/Toast.jsx';
+import { APP_CONFIG } from '../config.js';
 import SongRow from '../components/UI/SongRow.jsx';
-import Skeleton from '../components/UI/Skeleton.jsx';
 
 export default function Search() {
-  const [searchParams] = useSearchParams();
-  const initialQ = searchParams.get('q') || '';
-
-  const { state } = usePlayer();
-  const [query, setQuery] = useState(initialQ);
+  const { actions } = usePlayer();
+  const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
-  const inputRef = useRef(null);
-  const debounceRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Focus input on mount
-  useEffect(() => { inputRef.current?.focus(); }, []);
-
-  // Run initial search from URL params
   useEffect(() => {
-    if (initialQ) runSearch(initialQ);
-  }, []); // eslint-disable-line
-
-  const runSearch = useCallback(async (q) => {
-    if (!q.trim()) { setResults([]); setSearched(false); return; }
-    setLoading(true);
-    setSearched(true);
-    try {
-      let found;
-      if (APP_CONFIG.hasYouTubeKey) {
-        found = await searchYouTube(q, 20);
-      } else {
-        // Filter demo songs + state songs
-        const all = state.songs.length ? state.songs : DEMO_SONGS;
-        const ql = q.toLowerCase();
-        found = all.filter(s =>
-          s.title.toLowerCase().includes(ql) ||
-          s.artist.toLowerCase().includes(ql)
-        );
-      }
-      setResults(found);
-      if (!found.length) showToast('No results found', 'info');
-    } catch (err) {
-      showToast('Search failed — check your API key', 'error');
+    if (!query.trim()) {
       setResults([]);
-    } finally {
-      setLoading(false);
+      setError(null);
+      return;
     }
-  }, [state.songs]);
 
-  const handleChange = (e) => {
-    const val = e.target.value;
-    setQuery(val);
-    clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => runSearch(val), APP_CONFIG.searchDebounce);
-  };
+    const timer = setTimeout(async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        if (APP_CONFIG.hasYouTubeKey) {
+          const res = await searchYouTube(query, 12);
+          setResults(res);
+        } else {
+          // Demo mode fallback
+          const q = query.toLowerCase();
+          const filtered = DEMO_SONGS.filter(s => 
+            s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q)
+          );
+          setResults(filtered);
+        }
+      } catch (err) {
+        setError(err.message || 'Failed to search');
+      } finally {
+        setIsLoading(false);
+      }
+    }, 600);
 
-  const handleKey = (e) => {
-    if (e.key === 'Enter') { clearTimeout(debounceRef.current); runSearch(query); }
-  };
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  const genres = [
+    { name: 'Pop Hits', color: 'linear-gradient(135deg, #FF6B6B, #FF8E53)', icon: '🔥' },
+    { name: 'Hip Hop', color: 'linear-gradient(135deg, #4E65FF, #92EFFD)', icon: '🎤' },
+    { name: 'Chill Vibes', color: 'linear-gradient(135deg, #667EEA, #764BA2)', icon: '🌙' },
+    { name: 'Workout', color: 'linear-gradient(135deg, #00C9FF, #92FE9D)', icon: '💪' },
+    { name: 'Electronic', color: 'linear-gradient(135deg, #F953C6, #B91D73)', icon: '⚡' },
+    { name: 'Acoustic', color: 'linear-gradient(135deg, #F2994A, #F2C94C)', icon: '🎸' },
+  ];
 
   return (
-    <div>
+    <div style={{ paddingBottom: 100 }}>
       {/* ── Search Hero ── */}
-      <div className="search-page-hero">
-        <h1 className="search-page-title">
-          Search <span style={{ background:'var(--gradient-brand)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>anything</span> 🎵
-        </h1>
-
+      <section className="search-page-hero">
+        <h1 className="search-page-title">Explore Universe</h1>
+        
         <div className="search-input-wrapper">
-          <span className="search-input-icon">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </span>
+          <svg className="search-input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
           <input
-            ref={inputRef}
-            type="search"
-            placeholder="Song, artist, mood…"
+            type="text"
+            placeholder="What do you want to listen to?"
             value={query}
-            onChange={handleChange}
-            onKeyDown={handleKey}
-            aria-label="Search music"
-            id="search-input"
-            autoComplete="off"
+            onChange={(e) => setQuery(e.target.value)}
+            autoFocus
           />
+          {query && (
+            <button 
+              style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)' }}
+              onClick={() => setQuery('')}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          )}
         </div>
-      </div>
+      </section>
 
-      {/* ── Results ── */}
-      {loading ? (
-        <div style={{ padding: 'var(--space-6)' }}>
-          <Skeleton type="list" count={8} />
-        </div>
-      ) : searched && results.length > 0 ? (
-        <div style={{ padding: 'var(--space-2) var(--space-4) var(--space-6)' }}>
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'var(--space-4)', padding:'0 var(--space-2)' }}>
-            <h2 style={{ fontSize:'1rem', fontWeight:700, color:'var(--text-muted)' }}>
-              {results.length} results for "{query}"
-            </h2>
-          </div>
-          <div className="song-list">
-            {results.map((song, i) => (
-              <SongRow key={song.id + i} song={song} index={i} queue={results} />
-            ))}
-          </div>
-        </div>
-      ) : searched && results.length === 0 && !loading ? (
-        <div className="empty-state">
-          <div className="empty-icon">🔍</div>
-          <div className="empty-title">No results</div>
-          <div className="empty-desc">Try a different search term</div>
+      {/* ── Results or Genres ── */}
+      {query.trim() ? (
+        <div className="content-section">
+          {isLoading ? (
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center', opacity: 0.7 }}>
+              <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid var(--ambient-primary)', borderTopColor: 'transparent', animation: 'spin 1s linear infinite' }} />
+              <span>Scanning audio network...</span>
+            </div>
+          ) : error ? (
+            <div style={{ color: 'var(--brand-red)' }}>{error}</div>
+          ) : results.length > 0 ? (
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-glass)', borderRadius: 'var(--radius-lg)', padding: '12px' }}>
+              {results.map((song, i) => (
+                <SongRow key={song.id} song={song} queue={results} index={i} />
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state">
+              <div style={{ fontSize: '3rem', opacity: 0.5 }}>🪐</div>
+              <div className="empty-title" style={{ fontSize: '1.25rem' }}>No signals found</div>
+              <div className="empty-desc">Try searching for a different artist, song, or frequency.</div>
+            </div>
+          )}
         </div>
       ) : (
-        /* ── Genre Browse ── */
-        <div style={{ padding:'var(--space-2) var(--space-4) var(--space-6)' }}>
-          <h2 style={{ fontFamily:'var(--font-display)', fontSize:'1.125rem', fontWeight:800, marginBottom:'var(--space-4)', color:'var(--text-primary)' }}>
-            Browse by Genre
-          </h2>
+        <div className="content-section">
+          <h2 className="section-title">Browse Frequencies</h2>
           <div className="genre-grid">
-            {GENRE_CARDS.map(g => (
-              <div
-                key={g.label}
+            {genres.map(g => (
+              <div 
+                key={g.name} 
                 className="genre-card"
                 style={{ background: g.color }}
-                onClick={() => { setQuery(g.query); runSearch(g.query); }}
-                role="button"
-                tabIndex={0}
-                onKeyDown={e => e.key === 'Enter' && runSearch(g.query)}
-                aria-label={`Browse ${g.label}`}
+                onClick={() => setQuery(g.name)}
               >
-                <span className="genre-card-emoji">{g.emoji}</span>
-                <span className="genre-card-label">{g.label}</span>
+                <div className="genre-card-label">{g.name}</div>
+                <div className="genre-card-emoji">{g.icon}</div>
               </div>
             ))}
           </div>
