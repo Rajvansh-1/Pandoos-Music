@@ -1,8 +1,10 @@
 import { usePlayer } from '../../context/PlayerContext.jsx';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function SongRow({ song, queue, index }) {
   const { state, actions } = usePlayer();
+  const navigate = useNavigate();
   const isPlaying = state.currentSong?.id === song.id;
   const isLiked = state.likedSongs.has(song.id);
   const [hover, setHover] = useState(false);
@@ -46,7 +48,12 @@ export default function SongRow({ song, queue, index }) {
         <div className="song-row-title" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {song.title}
         </div>
-        <div className="song-row-artist" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div
+          className="song-row-artist"
+          style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', cursor: 'pointer' }}
+          onClick={(e) => { e.stopPropagation(); if (song.artist && song.artist !== 'Unknown') navigate(`/artist/${encodeURIComponent(song.artist)}`); }}
+          title={`Go to ${song.artist}`}
+        >
           {song.artist}
         </div>
       </div>

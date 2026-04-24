@@ -1,9 +1,11 @@
 import { usePlayer } from '../../context/PlayerContext.jsx';
 import { extractColors } from '../../services/colorExtractor.js';
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function SongCard({ song, queue, index }) {
   const { state, actions } = usePlayer();
+  const navigate = useNavigate();
   const isPlaying = state.currentSong?.id === song.id;
   const cardRef = useRef(null);
   
@@ -54,7 +56,14 @@ export default function SongCard({ song, queue, index }) {
         </button>
       </div>
       <div className="card-title" title={song.title}>{song.title}</div>
-      <div className="card-subtitle" title={song.artist}>{song.artist}</div>
+      <div
+        className="card-subtitle"
+        title={song.artist}
+        style={{ cursor: song.artist && song.artist !== 'Unknown' ? 'pointer' : 'default' }}
+        onClick={(e) => { e.stopPropagation(); if (song.artist && song.artist !== 'Unknown') navigate(`/artist/${encodeURIComponent(song.artist)}`); }}
+      >
+        {song.artist}
+      </div>
     </div>
   );
 }
