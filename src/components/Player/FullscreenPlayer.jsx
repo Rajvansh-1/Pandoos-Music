@@ -170,38 +170,51 @@ export default function FullscreenPlayer() {
 
         {/* ── Bottom Controls ── */}
         <div className="fs-bottom">
+
+          {/* Row 1: Song title + like */}
           <div className="fs-info">
-            <div>
+            <div className="fs-info-text">
               <div className="fs-title" title={currentSong.title}>{currentSong.title}</div>
-              <div 
-                className="fs-artist" 
+              <div
+                className="fs-artist"
                 onClick={() => { handleClose(); navigate(`/artist/${encodeURIComponent(currentSong.artist)}`); }}
               >
                 {currentSong.artist}
               </div>
             </div>
-            <LikeButton liked={isLiked} onClick={() => actions.toggleLike(currentSong.id)} size={32} />
+            <LikeButton liked={isLiked} onClick={() => actions.toggleLike(currentSong.id)} size={28} />
           </div>
 
-          <SeekBar />
+          {/* Row 2: Seek bar */}
+          <SeekBar large />
 
+          {/* Row 3: Playback controls */}
           <div className="fs-controls">
-            <button className={`icon-btn fs-control-btn ${shuffle ? 'active' : ''}`} onClick={actions.toggleShuffle}>
+            <button
+              className={`icon-btn fs-control-btn${shuffle ? ' active' : ''}`}
+              onClick={actions.toggleShuffle}
+              title="Shuffle"
+            >
               <ShuffleIcon />
             </button>
-            <button className="icon-btn fs-control-btn" onClick={actions.prevTrack}>
+            <button className="icon-btn fs-control-btn" onClick={actions.prevTrack} title="Previous">
               <PrevIcon />
             </button>
-            <button className="fs-btn-play luxury-play" onClick={actions.togglePlay}>
+            <button className="fs-btn-play luxury-play" onClick={actions.togglePlay} aria-label={isPlaying ? 'Pause' : 'Play'}>
               {isPlaying ? <PauseIcon /> : <PlayIcon />}
             </button>
-            <button className="icon-btn fs-control-btn" onClick={actions.nextTrack}>
+            <button className="icon-btn fs-control-btn" onClick={actions.nextTrack} title="Next">
               <NextIcon />
             </button>
-            <button className={`icon-btn fs-control-btn ${repeat !== 'none' ? 'active' : ''}`} onClick={actions.cycleRepeat}>
+            <button
+              className={`icon-btn fs-control-btn${repeat !== 'none' ? ' active' : ''}`}
+              onClick={actions.cycleRepeat}
+              title={repeat === 'one' ? 'Repeat one' : 'Repeat'}
+            >
               {repeat === 'one' ? <RepeatOneIcon /> : <RepeatIcon />}
             </button>
           </div>
+
         </div>
 
       </div>

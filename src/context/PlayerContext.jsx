@@ -183,7 +183,7 @@ export function PlayerProvider({ children }) {
         const dur = p.getDuration()    || 0;
         dispatch({ type: 'SET_PROGRESS', progress: dur ? cur / dur : 0, currentTime: cur, duration: dur });
       } catch { /* player destroyed */ }
-    }, 500);
+    }, 50); // Lightning fast polling for lyrics syncing and seek bar updates
   }, []);
 
   const stopPoll = useCallback(() => clearInterval(progressRef.current), []);
