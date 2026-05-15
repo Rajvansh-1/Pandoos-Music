@@ -40,7 +40,7 @@ export default function Library() {
       {/* ── Liked Songs ── */}
       <div className="content-section">
         <div className="section-header">
-          <h2 className="section-title">❤️ Liked Songs</h2>
+          <h2 className="section-title">🤍 Liked Songs</h2>
           {likedSongs.length > 0 && (
             <button
               className="btn-primary"
@@ -56,7 +56,7 @@ export default function Library() {
 
         {likedSongs.length === 0 ? (
           <div className="empty-state" style={{ minHeight: 200 }}>
-            <div className="empty-icon">❤️</div>
+            <div className="empty-icon">🤍</div>
             <div className="empty-title">No Liked Songs Yet</div>
             <div className="empty-desc">Hit the heart icon on any song to save it here</div>
           </div>
@@ -73,7 +73,7 @@ export default function Library() {
       {recentlyPlayed.length > 0 && (
         <div className="content-section">
           <div className="section-header">
-            <h2 className="section-title">🕐 Recently Played</h2>
+            <h2 className="section-title">🎋 Recently Played</h2>
           </div>
           <div className="song-list">
             {recentlyPlayed.slice(0, 10).map((song, i) => (

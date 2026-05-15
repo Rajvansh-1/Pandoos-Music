@@ -33,7 +33,7 @@ export default function Home() {
         actions.setSongs(songs, playlists);
         showToast(
           APP_CONFIG.hasYouTubeKey
-            ? `🔥 ${songs.length} trending tracks loaded!`
+            ? `🎋 ${songs.length} trending tracks loaded!`
             : '🐼 Demo mode — add YouTube API key for trending music',
           'success'
         );
@@ -64,10 +64,25 @@ export default function Home() {
         </h1>
         <p style={{ color:'var(--text-muted)', fontSize:'0.875rem', fontWeight:600, marginTop:8, position:'relative', zIndex:1 }}>
           {APP_CONFIG.hasYouTubeKey
-            ? '🔥 Trending hits from YouTube — updated every 30 minutes'
+            ? '🎋 Trending hits from YouTube — updated every 30 minutes'
             : '🐼 Demo mode · Add your YouTube API key to unlock everything'}
         </p>
-        <div className="hero-panda" aria-hidden="true">🐼</div>
+        {/* ── Animated panda bamboo scene ── */}
+        <div className="hero-panda-scene" aria-hidden="true">
+          <div className="bamboo-stalk bamboo-1">
+            <span className="bamboo-seg">🎋</span>
+            <span className="bamboo-seg">🎋</span>
+            <span className="bamboo-seg">🍃</span>
+          </div>
+          <div className="bamboo-stalk bamboo-2">
+            <span className="bamboo-seg">🎋</span>
+            <span className="bamboo-seg">🍃</span>
+          </div>
+          <div className="panda-hangs">🐼</div>
+          <div className="leaf-fall leaf-1">🍃</div>
+          <div className="leaf-fall leaf-2">🌿</div>
+          <div className="leaf-fall leaf-3">🍃</div>
+        </div>
       </div>
 
       {/* ── Mood / Quick-search chips ─────────────────── */}
@@ -124,7 +139,7 @@ export default function Home() {
       <section className="content-section">
         <div className="section-header">
           <h2 className="section-title">
-            {APP_CONFIG.hasYouTubeKey ? '🔥 Trending Now' : '🎵 Featured Songs'}
+            {APP_CONFIG.hasYouTubeKey ? '🎋 Trending Now' : '🍃 Featured Songs'}
           </h2>
           {songs.length > 8 && (
             <span className="section-see-all" onClick={() => {}}>

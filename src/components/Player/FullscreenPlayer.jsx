@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePlayer } from '../../context/PlayerContext.jsx';
 import { fetchLyrics } from '../../services/lyrics.js';
@@ -13,277 +13,266 @@ export default function FullscreenPlayer() {
 
   const [tab,          setTab]          = useState('player');
   const [lyrics,       setLyrics]       = useState(null);
-  const [lyricsStatus, setLyricsStatus] = useState('idle'); // 'idle'|'loading'|'found'|'not-found'
+  const [lyricsStatus, setLyricsStatus] = useState('idle');
   const [closing,      setClosing]      = useState(false);
+  const [mounted,      setMounted]      = useState(false);
 
   const isLiked = currentSong ? likedSongs.has(currentSong.id) : false;
 
-  // Fetch lyrics when tab = lyrics
+  // Trigger entrance animation
+  useEffect(() => {
+    requestAnimationFrame(() => setMounted(true));
+  }, []);
+
   useEffect(() => {
     if (tab !== 'lyrics' || !currentSong) return;
     setLyricsStatus('loading');
     setLyrics(null);
     fetchLyrics(currentSong.artist, currentSong.title)
       .then(l => { setLyrics(l); setLyricsStatus(l ? 'found' : 'not-found'); })
-      .catch(()  => setLyricsStatus('not-found'));
+      .catch(() => setLyricsStatus('not-found'));
   }, [currentSong?.id, tab]); // eslint-disable-line
 
   const handleClose = () => {
     setClosing(true);
-    setTimeout(actions.toggleFullscreen, 280);
+    setMounted(false);
+    setTimeout(actions.toggleFullscreen, 400);
   };
 
   if (!currentSong) return null;
 
+  const bgArt = currentSong.coverUrl;
+
   return (
     <div
-      className={`fullscreen-player${closing ? ' closing' : ''}`}
+      className={`fs-overlay${mounted && !closing ? ' fs-visible' : ''}`}
       role="dialog"
       aria-modal="true"
       aria-label="Full player"
     >
-      {/* ── Header ─────────────────────────────────────── */}
-      <div className="fullscreen-header">
-        <button className="topbar-btn" onClick={handleClose} aria-label="Close player">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-        <span className="fullscreen-label">Now Playing</span>
-        <div style={{ width: 32 }} />
+      {/* ── Blurred art background ── */}
+      <div className="fs-bg">
+        {bgArt && (
+          <img src={bgArt} className="fs-bg-img" alt="" aria-hidden="true" />
+        )}
+        <div className="fs-bg-tint" />
       </div>
 
-      {/* ── Tab selector ───────────────────────────────── */}
-      <div style={{ display:'flex', gap:4, background:'var(--bg-surface)', borderRadius:'var(--radius-full)', padding:4, width:'100%', maxWidth:400 }}>
-        {['player', 'lyrics', 'queue'].map(t => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            style={{
-              flex:1, padding:'6px 0', borderRadius:'var(--radius-full)',
-              fontSize:'0.8125rem', fontWeight:700,
-              background: tab === t ? 'var(--bg-active)' : 'transparent',
-              color:      tab === t ? 'var(--text-primary)' : 'var(--text-muted)',
-              transition: 'var(--transition-fast)',
-              textTransform: 'capitalize',
-            }}
-          >
-            {t}
+      {/* ── Floating panda leaf decoration ── */}
+      <div className="fs-panda-deco" aria-hidden="true">🎋</div>
+
+      {/* ── Glass panel ── */}
+      <div className="fs-glass-panel">
+
+        {/* Header */}
+        <div className="fs-header">
+          <button className="fs-close-btn" onClick={handleClose} aria-label="Close player">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
           </button>
-        ))}
-      </div>
+          <span className="fs-header-label">Now Playing</span>
+          <div style={{ width: 36 }} />
+        </div>
 
-      {/* ══════════ PLAYER TAB ══════════════════════════ */}
-      {tab === 'player' && (
-        <>
-          {/* Album art disc */}
-          <div style={{ position:'relative', display:'flex', alignItems:'center', justifyContent:'center' }}>
-            {currentSong.coverUrl ? (
-              <img
-                className="fullscreen-album-art"
-                src={currentSong.coverUrl}
-                alt={currentSong.title}
-                style={{
-                  animation: 'albumSpin 30s linear infinite',
-                  animationPlayState: isPlaying ? 'running' : 'paused'
-                }}
-              />
-            ) : (
-              <div
-                className="fullscreen-album-art-placeholder"
-                style={{ background:'linear-gradient(135deg,#0d2b1e,#1a0d2b)' }}
-              >
-                🎵
-              </div>
-            )}
-            {isPlaying && (
-              <div style={{
-                position:'absolute', inset:-20, borderRadius:'var(--radius-xl)',
-                border:'2px solid rgba(34,197,94,0.15)',
-                animation:'pulse 2.5s ease infinite',
-                pointerEvents:'none',
-              }} />
-            )}
-          </div>
-
-          {/* Title + Like */}
-          <div className="fullscreen-info" style={{ maxWidth:440, width:'100%' }}>
-            <div style={{ minWidth:0 }}>
-              <div className="fullscreen-title" style={{ fontSize:'clamp(1.25rem,4vw,1.75rem)' }}>
-                {currentSong.title}
-              </div>
-              <div 
-                className="fullscreen-artist hover-link" 
-                onClick={() => {
-                  actions.toggleFullscreen();
-                  navigate(`/artist/${encodeURIComponent(currentSong.artist)}`);
-                }}
-                style={{ cursor: 'pointer', display: 'inline-block' }}
-              >
-                {currentSong.artist}
-              </div>
-            </div>
-            <LikeButton liked={isLiked} onClick={() => actions.toggleLike(currentSong.id)} size={26} />
-          </div>
-
-          {/* Seek bar */}
-          <div style={{ width:'100%', maxWidth:440 }}>
-            <SeekBar />
-          </div>
-
-          {/* Controls */}
-          <div className="player-buttons" style={{ gap:'var(--space-5)' }}>
+        {/* Tab selector */}
+        <div className="fs-tabs">
+          {['player', 'lyrics', 'queue'].map(t => (
             <button
-              className={`ctrl-btn${shuffle ? ' active' : ''}`}
-              onClick={actions.toggleShuffle}
-              title="Shuffle (S)"
+              key={t}
+              onClick={() => setTab(t)}
+              className={`fs-tab-btn${tab === t ? ' active' : ''}`}
             >
-              <ShuffleIcon />
+              {t}
             </button>
+          ))}
+        </div>
 
-            <button className="ctrl-btn" style={{ width:44, height:44 }} onClick={actions.prevTrack}>
-              <PrevIcon />
-            </button>
-
-            <button
-              className="ctrl-btn ctrl-play"
-              style={{ width:60, height:60 }}
-              onClick={actions.togglePlay}
-              aria-label={isPlaying ? 'Pause' : 'Play'}
-            >
-              {isPlaying ? <PauseIcon size={22} /> : <PlayIcon size={22} />}
-            </button>
-
-            <button className="ctrl-btn" style={{ width:44, height:44 }} onClick={actions.nextTrack}>
-              <NextIcon />
-            </button>
-
-            <button
-              className={`ctrl-btn${repeat !== 'none' ? ' active' : ''}`}
-              onClick={actions.cycleRepeat}
-              title={`Repeat: ${repeat}`}
-            >
-              {repeat === 'one' ? <RepeatOneIcon /> : <RepeatIcon />}
-            </button>
-          </div>
-
-          {/* Volume */}
-          <div style={{ display:'flex', alignItems:'center', gap:'var(--space-3)', width:'100%', maxWidth:440 }}>
-            <button className="ctrl-btn" onClick={actions.toggleMute}>
-              {isMuted || volume === 0 ? <MuteIcon /> : <VolumeIcon />}
-            </button>
-            <input
-              type="range" min={0} max={1} step={0.02}
-              value={isMuted ? 0 : volume}
-              onChange={e => actions.setVolume(parseFloat(e.target.value))}
-              className="volume-slider"
-              style={{
-                flex:1,
-                background: `linear-gradient(to right, var(--brand-green) ${(isMuted ? 0 : volume) * 100}%, var(--bg-active) ${(isMuted ? 0 : volume) * 100}%)`,
-              }}
-              aria-label="Volume"
-            />
-          </div>
-        </>
-      )}
-
-      {/* ══════════ LYRICS TAB ══════════════════════════ */}
-      {tab === 'lyrics' && (
-        <div style={{ width:'100%', maxWidth:500, flex:1, overflowY:'auto', padding:'0 var(--space-2)', scrollBehavior: 'smooth' }}>
-          {lyricsStatus === 'loading' && (
-            <div style={{ textAlign:'center', padding:'var(--space-10)', color:'var(--text-muted)' }}>
-              <div style={{ fontSize:'2rem', animation:'pandaBounce 1s ease infinite' }}>🎵</div>
-              <div style={{ marginTop:'var(--space-3)', fontWeight:600 }}>Fetching lyrics…</div>
-            </div>
-          )}
-          {lyricsStatus === 'not-found' && (
-            <div className="empty-state">
-              <div className="empty-icon">🎤</div>
-              <div className="empty-title">Lyrics Not Found</div>
-              <div className="empty-desc">
-                Couldn't find lyrics for "{currentSong.title}". Try a different song!
-              </div>
-            </div>
-          )}
-          {lyricsStatus === 'found' && lyrics && (
-            <div className="lyrics-container" style={{
-              display: 'flex', flexDirection: 'column', gap: 'var(--space-4)',
-              padding: 'var(--space-4) 0', textAlign: 'center'
-            }}>
-              {lyrics.synced && lyrics.synced.length > 0 ? (
-                lyrics.synced.map((line, i) => {
-                  const isPast = state.currentTime >= line.time;
-                  const isCurrent = isPast && (i === lyrics.synced.length - 1 || state.currentTime < lyrics.synced[i+1].time);
-                  
-                  return (
-                    <div 
-                      key={i} 
-                      className={`lyric-line${isCurrent ? ' active' : ''}`}
-                      style={{
-                        fontSize: isCurrent ? 'clamp(1.5rem, 4vw, 2rem)' : 'clamp(1rem, 3vw, 1.25rem)',
-                        fontWeight: isCurrent ? 800 : 600,
-                        color: isCurrent ? 'var(--brand-green)' : (isPast ? 'var(--text-primary)' : 'var(--text-muted)'),
-                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                        transform: isCurrent ? 'scale(1.05)' : 'scale(1)',
-                        filter: isCurrent ? 'none' : 'blur(0.5px)',
-                        opacity: isCurrent ? 1 : 0.5,
-                        lineHeight: 1.4
-                      }}
-                      ref={isCurrent ? el => { if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } : null}
-                    >
-                      {line.text}
-                    </div>
-                  );
-                })
+        {/* ══ PLAYER TAB ══ */}
+        {tab === 'player' && (
+          <div className="fs-player-content">
+            {/* Album art */}
+            <div className="fs-art-wrapper">
+              {bgArt ? (
+                <img
+                  className={`fs-art${isPlaying ? ' spinning' : ''}`}
+                  src={bgArt}
+                  alt={currentSong.title}
+                />
               ) : (
-                <div style={{ fontSize: '1rem', lineHeight: 2.1, color: 'var(--text-secondary)', whiteSpace: 'pre-wrap' }}>
-                  {lyrics.plain}
-                </div>
+                <div className="fs-art-placeholder">🎋</div>
               )}
+              {isPlaying && <div className="fs-art-ring" />}
+              {isPlaying && <div className="fs-art-ring fs-art-ring-2" />}
             </div>
-          )}
-        </div>
-      )}
 
-      {/* ══════════ QUEUE TAB ═══════════════════════════ */}
-      {tab === 'queue' && (
-        <div style={{ width:'100%', maxWidth:500, flex:1, overflowY:'auto' }}>
-          {queue.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">📭</div>
-              <div className="empty-title">Queue is empty</div>
-            </div>
-          ) : (
-            <div className="queue-list" style={{ padding:'var(--space-2)' }}>
-              {queue.map((s, i) => (
+            {/* Title + like */}
+            <div className="fs-track-info">
+              <div className="fs-track-text">
+                <div className="fs-track-title">{currentSong.title}</div>
                 <div
-                  key={`${s.id}_${i}`}
-                  className={`queue-item${i === queueIndex ? ' active' : ''}`}
-                  onClick={() => actions.playSong(s, queue, i)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={e => e.key === 'Enter' && actions.playSong(s, queue, i)}
+                  className="fs-track-artist"
+                  onClick={() => {
+                    actions.toggleFullscreen();
+                    navigate(`/artist/${encodeURIComponent(currentSong.artist)}`);
+                  }}
                 >
-                  {s.coverUrl ? (
-                    <img className="queue-item-art" src={s.coverUrl} alt={s.title} loading="lazy" />
-                  ) : (
-                    <div className="queue-item-art" style={{ display:'flex', alignItems:'center', justifyContent:'center', background:'var(--bg-surface)', fontSize:'1rem' }}>
-                      🎵
-                    </div>
-                  )}
-                  <div className="queue-item-info">
-                    <div className="queue-item-title">{s.title}</div>
-                    <div className="queue-item-artist">{s.artist}</div>
-                  </div>
-                  {i === queueIndex && (
-                    <span style={{ color:'var(--brand-green)', fontSize:'0.75rem', fontWeight:800, flexShrink:0 }}>▶ Playing</span>
-                  )}
+                  {currentSong.artist}
                 </div>
-              ))}
+              </div>
+              <LikeButton liked={isLiked} onClick={() => actions.toggleLike(currentSong.id)} size={26} />
             </div>
-          )}
-        </div>
-      )}
+
+            {/* Seek bar */}
+            <div className="fs-seekbar-wrap">
+              <SeekBar />
+            </div>
+
+            {/* Controls */}
+            <div className="fs-controls">
+              <button
+                className={`ctrl-btn${shuffle ? ' active' : ''}`}
+                onClick={actions.toggleShuffle}
+                title="Shuffle"
+              >
+                <ShuffleIcon />
+              </button>
+
+              <button className="ctrl-btn" style={{ width:44, height:44 }} onClick={actions.prevTrack}>
+                <PrevIcon />
+              </button>
+
+              <button
+                className="ctrl-btn ctrl-play fs-play-btn"
+                onClick={actions.togglePlay}
+                aria-label={isPlaying ? 'Pause' : 'Play'}
+              >
+                {isPlaying ? <PauseIcon size={26} /> : <PlayIcon size={26} />}
+              </button>
+
+              <button className="ctrl-btn" style={{ width:44, height:44 }} onClick={actions.nextTrack}>
+                <NextIcon />
+              </button>
+
+              <button
+                className={`ctrl-btn${repeat !== 'none' ? ' active' : ''}`}
+                onClick={actions.cycleRepeat}
+                title={`Repeat: ${repeat}`}
+              >
+                {repeat === 'one' ? <RepeatOneIcon /> : <RepeatIcon />}
+              </button>
+            </div>
+
+            {/* Volume */}
+            <div className="fs-volume">
+              <button className="ctrl-btn" onClick={actions.toggleMute}>
+                {isMuted || volume === 0 ? <MuteIcon /> : <VolumeIcon />}
+              </button>
+              <input
+                type="range" min={0} max={1} step={0.02}
+                value={isMuted ? 0 : volume}
+                onChange={e => actions.setVolume(parseFloat(e.target.value))}
+                className="volume-slider"
+                style={{
+                  flex: 1,
+                  background: `linear-gradient(to right, var(--brand-green) ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.15) ${(isMuted ? 0 : volume) * 100}%)`,
+                }}
+                aria-label="Volume"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* ══ LYRICS TAB ══ */}
+        {tab === 'lyrics' && (
+          <div className="fs-scroll-content">
+            {lyricsStatus === 'loading' && (
+              <div style={{ textAlign:'center', padding:'var(--space-10)', color:'var(--text-muted)' }}>
+                <div style={{ fontSize:'2.5rem', animation:'pandaBounce 1s ease infinite' }}>🎋</div>
+                <div style={{ marginTop:'var(--space-3)', fontWeight:700, letterSpacing:'0.05em' }}>Fetching lyrics…</div>
+              </div>
+            )}
+            {lyricsStatus === 'not-found' && (
+              <div className="empty-state">
+                <div className="empty-icon">🎤</div>
+                <div className="empty-title">Lyrics Not Found</div>
+                <div className="empty-desc">Couldn't find lyrics for "{currentSong.title}"</div>
+              </div>
+            )}
+            {lyricsStatus === 'found' && lyrics && (
+              <div className="lyrics-container" style={{ display:'flex', flexDirection:'column', gap:'var(--space-4)', padding:'var(--space-4) 0', textAlign:'center' }}>
+                {lyrics.synced && lyrics.synced.length > 0 ? (
+                  lyrics.synced.map((line, i) => {
+                    const isPast    = state.currentTime >= line.time;
+                    const isCurrent = isPast && (i === lyrics.synced.length - 1 || state.currentTime < lyrics.synced[i+1].time);
+                    return (
+                      <div
+                        key={i}
+                        className={`lyric-line${isCurrent ? ' active' : ''}`}
+                        style={{
+                          fontSize:   isCurrent ? 'clamp(1.5rem,4vw,2rem)' : 'clamp(1rem,3vw,1.25rem)',
+                          fontWeight: isCurrent ? 800 : 600,
+                          color:      isCurrent ? 'var(--brand-green)' : (isPast ? 'var(--text-primary)' : 'var(--text-muted)'),
+                          transition: 'all 0.4s cubic-bezier(0.4,0,0.2,1)',
+                          transform:  isCurrent ? 'scale(1.05)' : 'scale(1)',
+                          filter:     isCurrent ? 'none' : 'blur(0.5px)',
+                          opacity:    isCurrent ? 1 : 0.55,
+                          lineHeight: 1.4,
+                        }}
+                        ref={isCurrent ? el => { if (el) el.scrollIntoView({ behavior:'smooth', block:'center' }); } : null}
+                      >
+                        {line.text}
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div style={{ fontSize:'1rem', lineHeight:2.1, color:'var(--text-secondary)', whiteSpace:'pre-wrap' }}>
+                    {lyrics.plain}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ══ QUEUE TAB ══ */}
+        {tab === 'queue' && (
+          <div className="fs-scroll-content">
+            {queue.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">🐼</div>
+                <div className="empty-title">Queue is empty</div>
+              </div>
+            ) : (
+              <div className="queue-list" style={{ padding:'var(--space-2)' }}>
+                {queue.map((s, i) => (
+                  <div
+                    key={`${s.id}_${i}`}
+                    className={`queue-item${i === queueIndex ? ' active' : ''}`}
+                    onClick={() => actions.playSong(s, queue, i)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={e => e.key === 'Enter' && actions.playSong(s, queue, i)}
+                  >
+                    {s.coverUrl ? (
+                      <img className="queue-item-art" src={s.coverUrl} alt={s.title} loading="lazy" />
+                    ) : (
+                      <div className="queue-item-art" style={{ display:'flex', alignItems:'center', justifyContent:'center', background:'rgba(255,255,255,0.08)', fontSize:'1rem' }}>🎋</div>
+                    )}
+                    <div className="queue-item-info">
+                      <div className="queue-item-title">{s.title}</div>
+                      <div className="queue-item-artist">{s.artist}</div>
+                    </div>
+                    {i === queueIndex && (
+                      <span style={{ color:'var(--brand-green)', fontSize:'0.75rem', fontWeight:800, flexShrink:0 }}>▶ Playing</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -293,7 +282,6 @@ const PlayIcon  = ({ size = 16 }) => <svg width={size} height={size} viewBox="0 
 const PauseIcon = ({ size = 16 }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>;
 const PrevIcon  = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>;
 const NextIcon  = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>;
-
 function ShuffleIcon() {
   return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
     <polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/>

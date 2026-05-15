@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect } from 'react';
 import { PlayerProvider, usePlayer } from './context/PlayerContext.jsx';
+import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import Sidebar from './components/Layout/Sidebar.jsx';
 import Topbar from './components/Layout/Topbar.jsx';
 import MobileNav from './components/Layout/MobileNav.jsx';
@@ -14,45 +14,56 @@ import Search from './pages/Search.jsx';
 import Library from './pages/Library.jsx';
 import Playlist from './pages/Playlist.jsx';
 import Artist from './pages/Artist.jsx';
+import Auth from './pages/Auth.jsx';
+import Settings from './pages/Settings.jsx';
+import Downloads from './pages/Downloads.jsx';
+
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user) return <Navigate to="/auth" replace />;
+  return children;
+}
 
 function AppShell() {
   const { state } = usePlayer();
+  const { user } = useAuth();
 
   return (
-    <div className="app-layout">
-      {/* ── Hidden YouTube audio engine ── */}
+    <div className={`app-layout${state.isPlaying ? ' app-is-playing' : ''}`}>
       <YouTubePlayer />
 
-      {/* ── Desktop Sidebar ── */}
-      <Sidebar />
+      {user && <Sidebar />}
 
-      {/* ── Main content area ── */}
-      <div className="main-area">
-        <Topbar />
+      <div className="main-area" style={!user ? { gridColumn: '1 / -1' } : {}}>
+        {user && <Topbar />}
         <div className="page-content" id="page-scroll">
           <Routes>
-            <Route path="/"             element={<Home />} />
-            <Route path="/search"       element={<Search />} />
-            <Route path="/library"      element={<Library />} />
-            <Route path="/playlist/:id" element={<Playlist />} />
-            <Route path="/artist/:name" element={<Artist />} />
-            <Route path="*"             element={<Navigate to="/" replace />} />
+            <Route path="/auth" element={user ? <Navigate to="/" replace /> : <Auth />} />
+            <Route path="/"            element={<ProtectedRoute><Home /></ProtectedRoute>} />
+            <Route path="/search"      element={<ProtectedRoute><Search /></ProtectedRoute>} />
+            <Route path="/library"     element={<ProtectedRoute><Library /></ProtectedRoute>} />
+            <Route path="/favorites"   element={<ProtectedRoute><Downloads /></ProtectedRoute>} />
+            <Route path="/downloads"   element={<ProtectedRoute><Downloads /></ProtectedRoute>} />
+            <Route path="/settings"    element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/playlist/:id" element={<ProtectedRoute><Playlist /></ProtectedRoute>} />
+            <Route path="/artist/:name" element={<ProtectedRoute><Artist /></ProtectedRoute>} />
+            <Route path="*"            element={<Navigate to="/" replace />} />
           </Routes>
         </div>
       </div>
 
-      {/* ── Desktop Player Bar ── */}
-      <PlayerBar />
+      {user && (
+        <>
+          <PlayerBar />
+          <MiniPlayer />
+          <MobileNav />
+        </>
+      )}
 
-      {/* ── Mobile: Mini player + bottom nav ── */}
-      <MiniPlayer />
-      <MobileNav />
-
-      {/* ── Fullscreen overlay ── */}
       {state.showFullscreen && <FullscreenPlayer />}
-
-      {/* ── Toast notifications ── */}
       <Toast />
+      {state.isPlaying && <div className="playing-ambient" aria-hidden="true" />}
     </div>
   );
 }
@@ -60,9 +71,11 @@ function AppShell() {
 export default function App() {
   return (
     <BrowserRouter>
-      <PlayerProvider>
-        <AppShell />
-      </PlayerProvider>
+      <AuthProvider>
+        <PlayerProvider>
+          <AppShell />
+        </PlayerProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

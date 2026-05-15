@@ -11,9 +11,9 @@
 import { YOUTUBE_API_KEY } from '../config.js';
 
 // Auto-flush legacy dirty caches
-if (!localStorage.getItem('yt_cache_reset_v2')) {
+if (!localStorage.getItem('yt_cache_reset_v3')) {
   Object.keys(localStorage).filter(k => k.startsWith('yt_cache_')).forEach(k => localStorage.removeItem(k));
-  localStorage.setItem('yt_cache_reset_v2', 'true');
+  localStorage.setItem('yt_cache_reset_v3', 'true');
 }
 
 const YT_API = 'https://www.googleapis.com/youtube/v3';
@@ -271,10 +271,10 @@ export function buildPlaylists(songs) {
   const allIds = songs.map(s => s.id);
   const mid    = Math.ceil(allIds.length / 2);
   return [
-    { id:'pl_trending', name:'Trending Now',    emoji:'🔥', description:'What India is listening to right now', songIds: allIds,            gradient:'linear-gradient(135deg,#2b0d0d,#060608)' },
-    { id:'pl_vibes',    name:'Desi Vibes',       emoji:'💃', description:'Pure desi hits, fresh picks',          songIds: allIds.slice(0,mid),gradient:'linear-gradient(135deg,#1e1a0d,#060608)' },
-    { id:'pl_chill',    name:'Late Night Chill', emoji:'🌙', description:'Soft songs for quiet nights',          songIds: allIds.slice(mid), gradient:'linear-gradient(135deg,#0d1a2b,#060608)' },
-    { id:'pl_liked',    name:'Liked Songs',      emoji:'❤️', description:'Your saved favourites',               songIds: [],               gradient:'linear-gradient(135deg,#1a0d2b,#060608)' },
+    { id:'pl_trending', name:'Trending Now',    emoji:'🎋', description:'What India is listening to right now', songIds: allIds,            gradient:'linear-gradient(135deg,#0e1a0a,#0e0e0e)' },
+    { id:'pl_vibes',    name:'Desi Vibes',       emoji:'🍃', description:'Pure desi hits, fresh picks',          songIds: allIds.slice(0,mid),gradient:'linear-gradient(135deg,#1a1a0e,#0e0e0e)' },
+    { id:'pl_chill',    name:'Late Night Chill', emoji:'🐾', description:'Soft songs for quiet nights',          songIds: allIds.slice(mid), gradient:'linear-gradient(135deg,#0e0e1a,#0e0e0e)' },
+    { id:'pl_liked',    name:'Liked Songs',      emoji:'🤍', description:'Your saved favourites',               songIds: [],               gradient:'linear-gradient(135deg,#1a1a1a,#0e0e0e)' },
   ];
 }
 

@@ -29,25 +29,25 @@ export const APP_CONFIG = {
 
 // Trending search terms shown on Home when no API key
 export const FEATURED_SEARCHES = [
-  { label: '🔥 Top Hits 2024',    query: 'top hits 2024' },
-  { label: '🎵 Bollywood',        query: 'bollywood hits 2024' },
-  { label: '💃 Punjabi',          query: 'punjabi songs 2024' },
-  { label: '🌙 Lo-Fi Chill',      query: 'lofi chill music' },
-  { label: '⚡ Party Mix',        query: 'party mix 2024' },
-  { label: '❤️ Romantic',         query: 'romantic songs' },
-  { label: '🎸 Rock Classics',    query: 'rock classics' },
-  { label: '🧘 Meditation',       query: 'meditation music' },
+  { label: '🐼 Top Hits 2024',    query: 'top hits 2024' },
+  { label: '🎋 Bollywood',        query: 'bollywood hits 2024' },
+  { label: '🍃 Punjabi',          query: 'punjabi songs 2024' },
+  { label: '🌿 Lo-Fi Chill',      query: 'lofi chill music' },
+  { label: '🐾 Party Mix',        query: 'party mix 2024' },
+  { label: '🤍 Romantic',         query: 'romantic songs' },
+  { label: '🖤 Rock Classics',    query: 'rock classics' },
+  { label: '🐼 Meditation',       query: 'meditation music' },
 ];
 
 export const GENRE_CARDS = [
-  { label: 'Bollywood',    query: 'bollywood songs 2024',    color: '#e11d48', emoji: '💃' },
-  { label: 'Punjabi',      query: 'punjabi hits 2024',       color: '#7c3aed', emoji: '🎤' },
-  { label: 'Lo-Fi',        query: 'lofi chill beats',        color: '#0891b2', emoji: '🌙' },
-  { label: 'Hip-Hop',      query: 'hindi hip hop rap 2024',  color: '#d97706', emoji: '🎧' },
-  { label: 'Romance',      query: 'romantic love songs',     color: '#db2777', emoji: '❤️' },
-  { label: 'Electronic',   query: 'electronic edm 2024',     color: '#059669', emoji: '⚡' },
-  { label: 'Classic Rock', query: 'classic rock hits',       color: '#dc2626', emoji: '🎸' },
-  { label: 'Devotional',   query: 'bhajan devotional songs', color: '#ca8a04', emoji: '🙏' },
-  { label: 'Indie',        query: 'indie pop 2024',          color: '#2563eb', emoji: '🎵' },
-  { label: 'Workout',      query: 'workout gym music 2024',  color: '#16a34a', emoji: '💪' },
+  { label: 'Bollywood',    query: 'bollywood songs 2024',    color: '#2d2d2d', emoji: '🎋' },
+  { label: 'Punjabi',      query: 'punjabi hits 2024',       color: '#3a3a3a', emoji: '🍃' },
+  { label: 'Lo-Fi',        query: 'lofi chill beats',        color: '#1a2e1a', emoji: '🌿' },
+  { label: 'Hip-Hop',      query: 'hindi hip hop rap 2024',  color: '#252525', emoji: '🐾' },
+  { label: 'Romance',      query: 'romantic love songs',     color: '#2a1a1a', emoji: '🤍' },
+  { label: 'Electronic',   query: 'electronic edm 2024',     color: '#1a1a2e', emoji: '🖤' },
+  { label: 'Classic Rock', query: 'classic rock hits',       color: '#2e1a1a', emoji: '🐼' },
+  { label: 'Devotional',   query: 'bhajan devotional songs', color: '#1e2e1a', emoji: '🎋' },
+  { label: 'Indie',        query: 'indie pop 2024',          color: '#1a1a1a', emoji: '🍃' },
+  { label: 'Workout',      query: 'workout gym music 2024',  color: '#1a2a1a', emoji: '🐾' },
 ];

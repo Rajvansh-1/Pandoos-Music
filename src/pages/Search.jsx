@@ -70,7 +70,7 @@ export default function Search() {
       {/* ── Search Hero ── */}
       <div className="search-page-hero">
         <h1 className="search-page-title">
-          Search <span style={{ background:'var(--gradient-brand)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>anything</span> 🎵
+          Search <span style={{ background:'var(--gradient-brand)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent' }}>anything</span> 🍃
         </h1>
 
         <div className="search-input-wrapper">
@@ -113,7 +113,7 @@ export default function Search() {
         </div>
       ) : searched && results.length === 0 && !loading ? (
         <div className="empty-state">
-          <div className="empty-icon">🔍</div>
+          <div className="empty-icon">🐼</div>
           <div className="empty-title">No results</div>
           <div className="empty-desc">Try a different search term</div>
         </div>

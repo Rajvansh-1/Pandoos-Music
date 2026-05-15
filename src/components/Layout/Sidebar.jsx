@@ -1,36 +1,62 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { usePlayer } from '../../context/PlayerContext.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
+import {
+  Home, Search, Library, Heart, Download, Settings, Music2, ChevronRight,
+} from 'lucide-react';
+import { motion } from 'framer-motion';
 
-const NAV = [
-  { to: '/',        label: 'Home',    icon: HomeIcon },
-  { to: '/search',  label: 'Search',  icon: SearchIcon },
-  { to: '/library', label: 'Library', icon: LibraryIcon },
+const NAV_TOP = [
+  { to: '/',        label: 'Home',      Icon: Home },
+  { to: '/search',  label: 'Search',    Icon: Search },
+  { to: '/library', label: 'Library',   Icon: Library },
+];
+const NAV_BOTTOM = [
+  { to: '/favorites', label: 'Favorites', Icon: Heart },
+  { to: '/downloads', label: 'Downloads', Icon: Download },
+  { to: '/settings',  label: 'Settings',  Icon: Settings },
 ];
 
 export default function Sidebar() {
-  const { state, actions } = usePlayer();
+  const { state } = usePlayer();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   return (
     <aside className="sidebar">
       {/* Logo */}
-      <div className="sidebar-logo">
+      <div className="sidebar-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
         <div className="logo-mark">🐼</div>
-        <span className="logo-text">Pandoos</span>
+        <div className="logo-text-block">
+          <span className="logo-pandoos">Pandoos</span>
+          <span className="logo-music">Music</span>
+        </div>
       </div>
 
-      {/* Main nav */}
+      {/* Top Nav */}
       <nav className="sidebar-nav" aria-label="Main navigation">
-        <div className="nav-section-label">Menu</div>
-        {NAV.map(({ to, label, icon: Icon }) => (
+        <div className="nav-section-label">Discover</div>
+        {NAV_TOP.map(({ to, label, Icon }) => (
           <NavLink
             key={to}
             to={to}
             end={to === '/'}
             className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
           >
-            <span className="nav-icon"><Icon /></span>
-            <span>{label}</span>
+            {({ isActive }) => (
+              <>
+                <span className="nav-icon-wrap">
+                  <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
+                </span>
+                <span className="nav-label">{label}</span>
+                {isActive && (
+                  <motion.span
+                    layoutId="nav-active-dot"
+                    className="nav-active-dot"
+                  />
+                )}
+              </>
+            )}
           </NavLink>
         ))}
       </nav>
@@ -49,35 +75,51 @@ export default function Sidebar() {
               onKeyDown={e => e.key === 'Enter' && navigate(`/playlist/${pl.id}`)}
             >
               <span className="pl-emoji">{pl.emoji}</span>
-              <span>{pl.name}</span>
+              <span className="pl-name">{pl.name}</span>
+              <ChevronRight size={14} className="pl-arrow" />
             </div>
           ))}
         </div>
       )}
+
+      {/* Bottom Nav */}
+      <nav className="sidebar-nav sidebar-nav-bottom" aria-label="Secondary navigation">
+        <div className="nav-section-label">Your Space</div>
+        {NAV_BOTTOM.map(({ to, label, Icon }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+          >
+            {({ isActive }) => (
+              <>
+                <span className="nav-icon-wrap">
+                  <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
+                </span>
+                <span className="nav-label">{label}</span>
+              </>
+            )}
+          </NavLink>
+        ))}
+      </nav>
+
+      {/* User / Panda footer */}
+      <div className="sidebar-panda-footer">
+        {user ? (
+          <div className="sidebar-user">
+            <span className="sidebar-user-avatar">{user.avatar || '🐼'}</span>
+            <div className="sidebar-user-info">
+              <span className="sidebar-user-name">{user.name}</span>
+              <span className="sidebar-footer-text">munching bamboo & beats</span>
+            </div>
+          </div>
+        ) : (
+          <>
+            <span className="sidebar-footer-panda">🐼</span>
+            <span className="sidebar-footer-text">munching bamboo & beats</span>
+          </>
+        )}
+      </div>
     </aside>
-  );
-}
-
-function HomeIcon() {
-  return (
-    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-    </svg>
-  );
-}
-
-function SearchIcon() {
-  return (
-    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-    </svg>
-  );
-}
-
-function LibraryIcon() {
-  return (
-    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-    </svg>
   );
 }
