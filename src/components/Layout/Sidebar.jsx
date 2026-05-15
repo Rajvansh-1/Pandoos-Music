@@ -1,4 +1,5 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
+import PandaLogo from '../Brand/PandaLogo.jsx';
 import { usePlayer } from '../../context/PlayerContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import {
@@ -31,6 +32,11 @@ export default function Sidebar() {
           <span className="logo-pandoos">Pandoos</span>
           <span className="logo-music">Music</span>
         </div>
+      </div>
+      
+      {/* ── Gamification XP ── */}
+      <div style={{ padding: '0 16px' }}>
+        <XPProgress compact />
       </div>
 
       {/* Top Nav */}

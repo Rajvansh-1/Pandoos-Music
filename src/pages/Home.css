@@ -1,0 +1,132 @@
+/* ── Home Page CSS ───────────────────────────────────────────────────────── */
+
+.home-page {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hero Section */
+.home-hero {
+  padding: 100px 32px 40px;
+  position: relative;
+  border-bottom: 1px solid var(--border-glass);
+}
+
+@media (max-width: 768px) {
+  .home-hero { padding: 80px 16px 32px; }
+}
+
+.hero-bg-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  transition: background 1s ease;
+  z-index: 0;
+}
+
+.hero-top-badges {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.home-greeting {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  margin-bottom: 12px;
+  line-height: 1.1;
+  background: linear-gradient(to right, #fff, rgba(255,255,255,0.7));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Content Sections */
+.home-content {
+  padding-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+/* Grids */
+.recent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+/* Horizontal Scroll for Cards */
+.horizontal-scroll {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 200px; /* Fixed card width */
+  gap: 24px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 24px;
+  margin: 0 -32px;
+  padding-left: 32px;
+  padding-right: 32px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+}
+
+.horizontal-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.horizontal-scroll > * {
+  scroll-snap-align: start;
+}
+
+@media (max-width: 768px) {
+  .horizontal-scroll {
+    grid-auto-columns: 160px;
+    gap: 16px;
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+/* 3D Card Hover + Stagger Entrance */
+.song-card, .playlist-card, .song-row {
+  animation: slideUpFade 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  animation-delay: calc(var(--i) * 60ms);
+}
+
+.song-card, .playlist-card {
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease, background 0.3s ease;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.song-card:hover, .playlist-card:hover {
+  transform: translateY(-8px) rotateX(4deg) rotateY(-2deg);
+  box-shadow: 
+    -10px 10px 20px rgba(0,0,0,0.4),
+    0 0 15px rgba(255,255,255,0.05);
+}
+
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

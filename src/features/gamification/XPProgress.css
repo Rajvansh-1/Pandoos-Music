@@ -1,0 +1,138 @@
+/* ── XP Progress Component ── */
+
+/* ── Compact (Sidebar) ── */
+.xp-progress-compact {
+  padding: 12px 0;
+  border-top: 1px solid var(--border-glass);
+  margin-top: auto;
+}
+
+.xp-compact-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.xp-level-badge {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: var(--radius-round);
+  border: 1px solid;
+  flex-shrink: 0;
+}
+
+.xp-level-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.8rem;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.xp-amount {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* ── Shared bar styles ── */
+.xp-bar-track {
+  width: 100%;
+  height: 4px;
+  background: var(--xp-bar-bg, rgba(255, 255, 255, 0.06));
+  border-radius: var(--radius-round);
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.xp-bar-track--full {
+  height: 6px;
+}
+
+.xp-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-round);
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.xp-to-next {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+/* ── Full mode ── */
+.xp-progress-full {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-glass);
+}
+
+.xp-level-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.xp-level-number {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.xp-level-sub {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.xp-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.xp-level-name-full {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.xp-stats-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.xp-current {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.xp-next {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}

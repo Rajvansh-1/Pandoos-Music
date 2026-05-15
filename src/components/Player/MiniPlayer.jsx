@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { usePlayer } from '../../context/PlayerContext.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, SkipBack, SkipForward, ChevronUp, X } from 'lucide-react';
@@ -5,6 +6,7 @@ import { Play, Pause, SkipBack, SkipForward, ChevronUp, X } from 'lucide-react';
 export default function MiniPlayer() {
   const { state, actions } = usePlayer();
   const { currentSong, isPlaying, progress } = state;
+  const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
 
   return (
     <AnimatePresence>
@@ -94,3 +96,8 @@ export default function MiniPlayer() {
     </AnimatePresence>
   );
 }
+
+const PlayIcon  = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>;
+const PauseIcon = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>;
+const PrevIcon  = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" /></svg>;
+const NextIcon  = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" /></svg>;

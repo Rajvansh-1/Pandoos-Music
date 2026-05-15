@@ -78,7 +78,7 @@ function buildSong(item, durationSec = 0) {
 
   const rawTitle = (snippet.title || 'Unknown').replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"');
   let title = rawTitle;
-  let artist = snippet.channelTitle || 'YouTube';
+  let artist = snippet.channelTitle || 'Unknown';
 
   // 1. Remove generic YouTube noise labels
   let cleanTitle = rawTitle.replace(/\s*(?:\[|\(|\{)(?:official\s+(?:video|audio|music\s+video|lyric\s+video|lyrics|movie|mv|visualizer|teaser|trailer)|4k|1080p|hq|hd|full\s+video|full\s+song|full\s+audio|lyrical|lyric|video|audio|live)(?:\]|\)|\})/gi, '');
@@ -176,7 +176,7 @@ export async function searchYouTube(query, maxResults = 20) {
   const res = await fetch(url.toString());
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || `YouTube API error: ${res.status}`);
+    throw new Error(err.error?.message || `API error: ${res.status}`);
   }
   const json = await res.json();
   const items = json.items || [];

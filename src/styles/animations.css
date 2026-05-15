@@ -1,0 +1,183 @@
+/**
+ * Pandoos Music — Animation Keyframes
+ *
+ * Rules:
+ * - Only animate: opacity, transform, filter (GPU composited)
+ * - Never animate: width, height, top, left, margin, padding (causes layout)
+ * - Use will-change sparingly on key animated elements
+ */
+
+/* ── Panda Animations ── */
+
+/* Idle gentle bob */
+@keyframes panda-idle {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50%       { transform: translateY(-6px) rotate(1deg); }
+}
+
+/* Excited bounce */
+@keyframes panda-excited {
+  0%, 100% { transform: translateY(0) scale(1); }
+  20%       { transform: translateY(-14px) scale(1.05); }
+  40%       { transform: translateY(-4px) scale(0.97); }
+  60%       { transform: translateY(-10px) scale(1.03); }
+  80%       { transform: translateY(-2px) scale(0.99); }
+}
+
+/* Sleepy sway */
+@keyframes panda-sleepy {
+  0%, 100% { transform: rotate(-4deg); }
+  50%       { transform: rotate(4deg); }
+}
+
+/* Celebrating spin + bounce */
+@keyframes panda-celebrate {
+  0%   { transform: rotate(0deg) scale(1); }
+  25%  { transform: rotate(15deg) scale(1.1) translateY(-8px); }
+  50%  { transform: rotate(-10deg) scale(1.05); }
+  75%  { transform: rotate(8deg) scale(1.1) translateY(-6px); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+/* Focused breathing */
+@keyframes panda-focused {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.03); opacity: 0.9; }
+}
+
+/* Sad drooping */
+@keyframes panda-sad {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%       { transform: translateY(4px) rotate(-3deg); }
+}
+
+/* Ear wiggle (micro-animation) */
+@keyframes panda-ear-wiggle {
+  0%, 100%  { transform-origin: center bottom; transform: rotate(0deg); }
+  25%        { transform: rotate(12deg); }
+  75%        { transform: rotate(-8deg); }
+}
+
+/* Eye blink */
+@keyframes panda-blink {
+  0%, 90%, 100% { transform: scaleY(1); }
+  95%            { transform: scaleY(0.1); }
+}
+
+/* ── UI Micro-Animations ── */
+
+/* Floating particles drift upward */
+@keyframes particle-float {
+  0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+  10%  { opacity: 0.7; }
+  90%  { opacity: 0.3; }
+  100% { transform: translateY(-120px) translateX(var(--particle-drift, 20px)) scale(0.3); opacity: 0; }
+}
+
+/* Rain drops fall down */
+@keyframes rain-drop {
+  0%   { transform: translateY(-20px) translateX(0); opacity: 0; }
+  10%  { opacity: 0.6; }
+  100% { transform: translateY(100vh) translateX(var(--rain-drift, -10px)); opacity: 0; }
+}
+
+/* Energy pulse ring (workout mode) */
+@keyframes energy-pulse {
+  0%   { transform: scale(0.9); opacity: 0.8; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* Aurora wave */
+@keyframes aurora-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Slow shimmer for skeleton loaders */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Glow pulse for ambient elements */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px var(--mood-glow); }
+  50%       { box-shadow: 0 0 24px var(--mood-glow), 0 0 48px var(--mood-glow); }
+}
+
+/* Badge unlock celebration */
+@keyframes badge-pop {
+  0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+  60%  { transform: scale(1.2) rotate(5deg); opacity: 1; }
+  80%  { transform: scale(0.95) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* XP bar fill */
+@keyframes xp-fill {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* Slide in from bottom (for cards + panels) */
+@keyframes slide-up {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* Fade in */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Breathe — for streak badge, status indicators */
+@keyframes breathe {
+  from { opacity: 0.7; transform: scale(0.98); }
+  to   { opacity: 1;   transform: scale(1.02); }
+}
+
+/* Equalizer bars */
+@keyframes eq-bar-1 { 0%,100%{transform:scaleY(0.3)}50%{transform:scaleY(1)} }
+@keyframes eq-bar-2 { 0%,100%{transform:scaleY(0.6)}33%{transform:scaleY(0.2)}66%{transform:scaleY(1)} }
+@keyframes eq-bar-3 { 0%,100%{transform:scaleY(1)}40%{transform:scaleY(0.3)} }
+@keyframes eq-bar-4 { 0%,100%{transform:scaleY(0.4)}60%{transform:scaleY(0.9)} }
+
+/* ── Utility Classes ── */
+
+.animate-slide-up {
+  animation: slide-up 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease both;
+}
+
+.animate-badge-pop {
+  animation: badge-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite alternate;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* Stagger delays for list items */
+.stagger-1  { animation-delay: 0.05s; }
+.stagger-2  { animation-delay: 0.10s; }
+.stagger-3  { animation-delay: 0.15s; }
+.stagger-4  { animation-delay: 0.20s; }
+.stagger-5  { animation-delay: 0.25s; }
+.stagger-6  { animation-delay: 0.30s; }
+
+/* Panda state utility classes */
+.panda-idle      { animation: panda-idle 4s ease-in-out infinite; }
+.panda-excited   { animation: panda-excited 0.8s ease-in-out infinite; }
+.panda-sleepy    { animation: panda-sleepy 6s ease-in-out infinite; }
+.panda-celebrate { animation: panda-celebrate 0.6s ease-in-out infinite; }
+.panda-focused   { animation: panda-focused 3s ease-in-out infinite; }
+.panda-sad       { animation: panda-sad 3s ease-in-out infinite; }

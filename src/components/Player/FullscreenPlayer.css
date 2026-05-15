@@ -1,0 +1,748 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   FULLSCREEN PLAYER — Premium Vinyl Experience
+   Phase 2: Hyper-realistic vinyl, correct needle pivot, premium controls
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Base ──────────────────────────────────────────────────────────────── */
+.fullscreen-player {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: var(--bg-base);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: fsFadeIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+.fullscreen-player.closing {
+  animation: fsFadeOut 0.35s ease-in forwards;
+}
+
+/* ── Ambient Background ─────────────────────────────────────────────────── */
+.fs-bg-media-container {
+  position: absolute;
+  inset: -12%;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.fs-bg-media {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(90px) saturate(2.5);
+  opacity: 0.35;
+  animation: breathe 12s infinite alternate ease-in-out;
+  will-change: transform, opacity;
+}
+
+.fs-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(4,4,6,0.2) 0%,
+    rgba(4,4,6,0.7) 40%,
+    rgba(4,4,6,0.97) 100%
+  );
+  z-index: 1;
+}
+
+.fs-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background-image:
+    radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px),
+    radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 70px 70px, 45px 45px;
+  background-position: 0 0, 25px 25px;
+  animation: floatParticles 25s linear infinite;
+  opacity: 0.4;
+  mask-image: linear-gradient(to bottom, black 0%, transparent 60%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* ── Content Shell ──────────────────────────────────────────────────────── */
+.fs-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 24px 56px 32px;
+  gap: 0;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.fs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-shrink: 0;
+}
+
+.fs-now-playing-label {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.fs-close-btn {
+  width: 44px;
+  height: 44px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border-glass);
+  border-radius: 50%;
+  transition: var(--transition-fast);
+}
+
+.fs-close-btn:hover {
+  background: rgba(255,255,255,0.12);
+  transform: scale(1.08);
+}
+
+/* ── Mobile Tabs ─────────────────────────────────────────────────────────── */
+.fs-mobile-tabs {
+  display: none;
+}
+
+/* ── Main Layout (Vinyl | Lyrics) ───────────────────────────────────────── */
+.fs-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: center;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   VINYL RECORD — Hyper-realistic
+   ═══════════════════════════════════════════════════════════════════════════ */
+.fs-art-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.fs-vinyl-wrapper {
+  position: relative;
+  width: min(420px, 90vw);
+  height: min(420px, 90vw);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The spinning disc */
+.fs-vinyl-record {
+  width: 88%;
+  height: 88%;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Vinyl surface: dark with subtle gradient for 3D look */
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255,255,255,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at center, #1a1a1a 0%, #080808 60%, #000 100%);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04),
+    0 0 0 2px rgba(0,0,0,0.8),
+    0 30px 80px rgba(0,0,0,0.9),
+    0 0 60px rgba(0,0,0,0.5),
+    inset 0 0 30px rgba(0,0,0,0.6);
+  /* GPU compositing - prevents jitter */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Groove rings — multiple inset box-shadows simulate vinyl grooves */
+.vinyl-grooves {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background:
+    repeating-radial-gradient(
+      circle at center,
+      transparent 0px,
+      transparent 7px,
+      rgba(255,255,255,0.025) 7px,
+      rgba(255,255,255,0.025) 8px
+    );
+}
+
+/* Light shimmer simulating vinyl light reflection */
+.vinyl-shimmer {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(255,255,255,0.03) 30deg,
+    transparent 60deg,
+    rgba(255,255,255,0.015) 120deg,
+    transparent 180deg,
+    rgba(255,255,255,0.04) 210deg,
+    transparent 270deg,
+    rgba(255,255,255,0.02) 330deg,
+    transparent 360deg
+  );
+  animation: vinylShimmer 8s linear infinite;
+}
+
+@keyframes vinylShimmer {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Center label ring */
+.fs-vinyl-label-ring {
+  width: 38%;
+  height: 38%;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  box-shadow:
+    0 0 0 3px #111,
+    0 0 0 5px rgba(255,255,255,0.06),
+    0 0 0 6px #0a0a0a,
+    inset 0 2px 8px rgba(0,0,0,0.8);
+  overflow: hidden;
+}
+
+.fs-vinyl-label-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.fs-vinyl-label-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+/* Center spindle hole */
+.vinyl-spindle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #333, #111);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.1),
+    inset 0 1px 2px rgba(0,0,0,0.8);
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* ── Stylus / Needle Arm ─────────────────────────────────────────────────── */
+/*
+   Architecture:
+   - .fs-vinyl-needle is the pivot container, positioned at top-right of wrapper
+   - transform-origin: 12% 8% — pivot is near the top of the arm (the fulcrum)
+   - At rest (-38deg): needle lifts away from record
+   - Playing (18deg): needle swings in to touch the groove at ~75% radius
+*/
+.fs-vinyl-needle {
+  position: absolute;
+  top: -8%;
+  right: 2%;
+  width: 14%;
+  height: 55%;
+  transform-origin: 50% 8%;
+  transform: rotate(-38deg);
+  transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 20;
+  filter: drop-shadow(-4px 8px 16px rgba(0,0,0,0.7));
+}
+
+.fs-vinyl-needle.playing {
+  transform: rotate(18deg);
+}
+
+/* Arm body — the long thin rod */
+.needle-arm {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 82%;
+  background: linear-gradient(
+    to right,
+    #888,
+    #ddd 30%,
+    #ccc 50%,
+    #999 70%,
+    #777
+  );
+  border-radius: 3px 3px 2px 2px;
+  box-shadow: 1px 0 4px rgba(0,0,0,0.5);
+}
+
+/* Pivot head — the round bit at the top */
+.needle-head {
+  position: absolute;
+  left: 50%;
+  top: -2px;
+  transform: translateX(-50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #eee, #888);
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.8),
+    inset 0 1px 2px rgba(255,255,255,0.3);
+}
+
+/* Needle cartridge / stylus tip */
+.needle-tip {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 16%;
+  background: linear-gradient(to bottom, #aaa, #555);
+  border-radius: 0 0 2px 2px;
+}
+
+/* Ambient glow ring around vinyl when playing */
+.vinyl-ambient-ring {
+  position: absolute;
+  inset: -4%;
+  border-radius: 50%;
+  pointer-events: none;
+  background: transparent;
+  box-shadow: 0 0 0 2px transparent;
+  transition: box-shadow 1s ease, opacity 1s ease;
+  opacity: 0;
+}
+
+.vinyl-ambient-ring.active {
+  opacity: 1;
+  box-shadow:
+    0 0 60px 20px var(--ambient-glow),
+    0 0 120px 40px rgba(0,0,0,0);
+  animation: ambientPulse 3s ease-in-out infinite alternate;
+}
+
+@keyframes ambientPulse {
+  0% { box-shadow: 0 0 40px 10px var(--ambient-glow); }
+  100% { box-shadow: 0 0 80px 30px var(--ambient-glow); }
+}
+
+/* Reduced motion: no spin, no shimmer */
+@media (prefers-reduced-motion: reduce) {
+  .vinyl-shimmer { animation: none; }
+  .vinyl-ambient-ring { animation: none; }
+  .fs-bg-media { animation: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LYRICS PANEL
+   ═══════════════════════════════════════════════════════════════════════════ */
+.fs-lyrics-container {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 48px 16px 48px 4px;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 12%, black 88%, transparent 100%);
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+}
+
+.fs-lyrics-container::-webkit-scrollbar {
+  display: none;
+}
+
+.lyrics-synced-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 40% 0;
+}
+
+.fs-lyric-line {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    color 0.35s ease,
+    font-size 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    opacity 0.35s ease,
+    text-shadow 0.35s ease;
+  transform-origin: left center;
+  user-select: none;
+  border-radius: 8px;
+  padding: 4px 8px;
+  margin: 0 -8px;
+}
+
+.fs-lyric-line:hover {
+  color: var(--text-secondary);
+  background: rgba(255,255,255,0.04);
+}
+
+.fs-lyric-line.past {
+  color: rgba(255,255,255,0.5);
+}
+
+.fs-lyric-line.active {
+  color: #fff;
+  font-size: clamp(1.6rem, 3vw, 2.8rem);
+  text-shadow:
+    0 0 30px var(--ambient-glow),
+    0 0 60px rgba(255,255,255,0.2);
+  animation: lyricShimmer 2s ease-in-out infinite alternate;
+}
+
+@keyframes lyricShimmer {
+  0% { text-shadow: 0 0 20px var(--ambient-glow), 0 0 40px rgba(255,255,255,0.15); }
+  100% { text-shadow: 0 0 40px var(--ambient-glow), 0 0 80px rgba(255,255,255,0.25); }
+}
+
+/* Plain lyrics */
+.lyrics-plain {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px 0;
+}
+
+.lyrics-verse {
+  white-space: pre-wrap;
+  font-size: clamp(1rem, 1.8vw, 1.3rem);
+  color: var(--text-secondary);
+  line-height: 2;
+  font-weight: 500;
+  border-left: 2px solid var(--border-glass);
+  padding-left: 16px;
+}
+
+/* Empty / loading states */
+.lyrics-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  opacity: 0.5;
+  text-align: center;
+  gap: 12px;
+}
+
+.lyrics-empty-icon {
+  font-size: 3.5rem;
+  animation: float 4s ease-in-out infinite;
+}
+
+.lyrics-empty p {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 2vw, 1.8rem);
+  font-weight: 800;
+}
+
+.lyrics-empty-sub {
+  font-size: 0.875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.lyrics-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 40px 0;
+}
+
+.lyrics-skeleton {
+  height: 40px;
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border-radius: var(--radius-sm);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+.lyrics-skeleton.w-80 { width: 80%; }
+.lyrics-skeleton.w-75 { width: 75%; }
+.lyrics-skeleton.w-60 { width: 60%; }
+.lyrics-skeleton.w-50 { width: 50%; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BOTTOM CONTROLS — 3-row flex column
+   ═══════════════════════════════════════════════════════════════════════════ */
+.fs-bottom {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 16px;
+}
+
+/* Row 1: Song info + Like */
+.fs-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.fs-info-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.fs-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 2vw, 1.6rem);
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.fs-artist {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s;
+  margin-top: 2px;
+}
+
+.fs-artist:hover {
+  color: var(--text-primary);
+}
+
+/* Row 2: SeekBar */
+.fs-seekbar-row {
+  width: 100%;
+}
+
+/* Row 3: Playback controls */
+.fs-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.fs-ctrl-btn {
+  width: 44px;
+  height: 44px;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.fs-ctrl-btn:hover {
+  color: var(--text-primary);
+  transform: scale(1.12);
+}
+
+.fs-ctrl-btn.active {
+  color: var(--ambient-primary);
+}
+
+.fs-btn-play.luxury-play {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 8px 24px rgba(255,255,255,0.25),
+    0 0 40px rgba(255,255,255,0.1);
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s ease;
+  flex-shrink: 0;
+  border: none;
+  cursor: pointer;
+}
+
+.fs-btn-play.luxury-play:hover {
+  transform: scale(1.1);
+  box-shadow:
+    0 12px 32px rgba(255,255,255,0.35),
+    0 0 60px rgba(255,255,255,0.15);
+}
+
+.fs-btn-play.luxury-play:active {
+  transform: scale(0.96);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+@keyframes fsFadeIn {
+  from { opacity: 0; transform: translateY(24px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes fsFadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(32px); }
+}
+
+@keyframes floatParticles {
+  0%   { background-position: 0 0, 25px 25px; }
+  100% { background-position: 0 70px, 25px 95px; }
+}
+
+@keyframes breathe {
+  0%   { transform: scale(1) rotate(-2deg); }
+  100% { transform: scale(1.08) rotate(2deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-12px); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 0.2; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE — TABLET & MOBILE
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .fs-content {
+    padding: 20px 24px 24px;
+  }
+
+  .fs-mobile-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+  }
+
+  .fs-tab-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-glass);
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 800;
+    font-family: var(--font-display);
+    padding: 8px 24px;
+    border-radius: var(--radius-round);
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .fs-tab-btn.active {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border-color: var(--ambient-primary);
+    box-shadow: 0 0 12px var(--ambient-glow);
+  }
+
+  .fs-main {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  .fs-vinyl-wrapper {
+    width: min(280px, 75vw);
+    height: min(280px, 75vw);
+    margin: 16px auto;
+  }
+
+  .fs-lyrics-container {
+    padding: 20px 8px;
+  }
+
+  .fs-lyric-line {
+    font-size: clamp(1.2rem, 5vw, 1.8rem);
+  }
+
+  .fs-lyric-line.active {
+    font-size: clamp(1.4rem, 6vw, 2rem);
+  }
+
+  .fs-bottom {
+    gap: 8px;
+    padding-top: 12px;
+  }
+
+  .fs-controls-row {
+    gap: 12px;
+  }
+
+  .fs-btn-play.luxury-play {
+    width: 56px;
+    height: 56px;
+  }
+}
+
+@media (max-width: 480px) {
+  .fs-content {
+    padding: 16px 16px 20px;
+  }
+
+  .fs-now-playing-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+  }
+
+  .fs-vinyl-wrapper {
+    width: min(240px, 72vw);
+    height: min(240px, 72vw);
+  }
+
+  .fs-title {
+    font-size: 1rem;
+  }
+
+  .fs-controls-row {
+    gap: 8px;
+  }
+
+  .fs-ctrl-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .fs-btn-play.luxury-play {
+    width: 50px;
+    height: 50px;
+  }
+}

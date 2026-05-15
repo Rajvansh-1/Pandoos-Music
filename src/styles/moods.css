@@ -1,0 +1,124 @@
+/**
+ * Pandoos Music — Mood Themes
+ *
+ * Each mood activates via [data-mood="X"] on <html>.
+ * CSS transitions handle smooth switching (300ms).
+ * GPU-only properties used: opacity, transform, filter.
+ */
+
+/* ── Romantic 💕 ── */
+[data-mood='romantic'] {
+  --mood-primary:    #ff6b8a;
+  --mood-secondary:  #c44569;
+  --mood-glow:       rgba(255, 107, 138, 0.35);
+  --mood-bg-start:   rgba(255, 107, 138, 0.12);
+  --mood-bg-end:     rgba(196, 69, 105, 0.06);
+  --mood-particle:   #ff6b8a;
+  --mood-label:      'Romantic';
+  --mood-panda:      'happy';
+  --ambient-primary:    #ff6b8a;
+  --ambient-secondary:  #c44569;
+  --ambient-glow:       rgba(255, 107, 138, 0.35);
+  --ambient-gradient:   linear-gradient(180deg, rgba(255,107,138,0.18) 0%, rgba(4,4,6,1) 100%);
+}
+
+/* ── Melancholic 🌧️ ── */
+[data-mood='melancholic'] {
+  --mood-primary:    #7b9ee8;
+  --mood-secondary:  #4a6fa5;
+  --mood-glow:       rgba(123, 158, 232, 0.3);
+  --mood-bg-start:   rgba(74, 111, 165, 0.15);
+  --mood-bg-end:     rgba(30, 50, 90, 0.08);
+  --mood-particle:   #7b9ee8;
+  --mood-label:      'Melancholic';
+  --mood-panda:      'sad';
+  --ambient-primary:    #7b9ee8;
+  --ambient-secondary:  #4a6fa5;
+  --ambient-glow:       rgba(123, 158, 232, 0.3);
+  --ambient-gradient:   linear-gradient(180deg, rgba(74,111,165,0.2) 0%, rgba(4,4,6,1) 100%);
+}
+
+/* ── Energetic ⚡ ── */
+[data-mood='energetic'] {
+  --mood-primary:    #f59e0b;
+  --mood-secondary:  #ef4444;
+  --mood-glow:       rgba(245, 158, 11, 0.4);
+  --mood-bg-start:   rgba(245, 158, 11, 0.15);
+  --mood-bg-end:     rgba(239, 68, 68, 0.08);
+  --mood-particle:   #f59e0b;
+  --mood-label:      'Energetic';
+  --mood-panda:      'excited';
+  --ambient-primary:    #f59e0b;
+  --ambient-secondary:  #ef4444;
+  --ambient-glow:       rgba(245, 158, 11, 0.4);
+  --ambient-gradient:   linear-gradient(180deg, rgba(245,158,11,0.18) 0%, rgba(4,4,6,1) 100%);
+}
+
+/* ── Chill 🌙 ── */
+[data-mood='chill'] {
+  --mood-primary:    #6366f1;
+  --mood-secondary:  #8b5cf6;
+  --mood-glow:       rgba(99, 102, 241, 0.35);
+  --mood-bg-start:   rgba(99, 102, 241, 0.12);
+  --mood-bg-end:     rgba(139, 92, 246, 0.06);
+  --mood-particle:   #a78bfa;
+  --mood-label:      'Chill';
+  --mood-panda:      'relaxed';
+  --ambient-primary:    #6366f1;
+  --ambient-secondary:  #8b5cf6;
+  --ambient-glow:       rgba(99, 102, 241, 0.35);
+  --ambient-gradient:   linear-gradient(180deg, rgba(99,102,241,0.15) 0%, rgba(4,4,6,1) 100%);
+}
+
+/* ── Happy ☀️ ── */
+[data-mood='happy'] {
+  --mood-primary:    #4ade80;
+  --mood-secondary:  #22d3ee;
+  --mood-glow:       rgba(74, 222, 128, 0.4);
+  --mood-bg-start:   rgba(74, 222, 128, 0.15);
+  --mood-bg-end:     rgba(34, 211, 238, 0.06);
+  --mood-particle:   #4ade80;
+  --mood-label:      'Happy';
+  --mood-panda:      'celebrating';
+  --ambient-primary:    #4ade80;
+  --ambient-secondary:  #22d3ee;
+  --ambient-glow:       rgba(74, 222, 128, 0.4);
+  --ambient-gradient:   linear-gradient(180deg, rgba(74,222,128,0.15) 0%, rgba(4,4,6,1) 100%);
+}
+
+/* ── Devotional 🙏 ── */
+[data-mood='devotional'] {
+  --mood-primary:    #f97316;
+  --mood-secondary:  #ca8a04;
+  --mood-glow:       rgba(249, 115, 22, 0.35);
+  --mood-bg-start:   rgba(249, 115, 22, 0.12);
+  --mood-bg-end:     rgba(202, 138, 4, 0.06);
+  --mood-particle:   #f97316;
+  --mood-label:      'Devotional';
+  --mood-panda:      'focused';
+  --ambient-primary:    #f97316;
+  --ambient-secondary:  #ca8a04;
+  --ambient-glow:       rgba(249, 115, 22, 0.35);
+  --ambient-gradient:   linear-gradient(180deg, rgba(249,115,22,0.15) 0%, rgba(4,4,6,1) 100%);
+}
+
+/* ── Default / no mood set ── */
+:root {
+  --mood-primary:    #4ADE80;
+  --mood-secondary:  #22d3ee;
+  --mood-glow:       rgba(74, 222, 128, 0.35);
+  --mood-bg-start:   rgba(74, 222, 128, 0.12);
+  --mood-bg-end:     rgba(4, 4, 6, 0);
+  --mood-particle:   #4ADE80;
+  --mood-panda:      'idle';
+}
+
+/* Smooth mood transitions on the main-area background */
+.main-area {
+  transition: background 0.8s ease;
+}
+
+/* Mood-aware player bar glow line */
+.player-bar::before {
+  transition: background 0.8s ease, box-shadow 0.8s ease;
+}

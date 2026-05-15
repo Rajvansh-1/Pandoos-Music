@@ -1,0 +1,126 @@
+.luxury-mini-player {
+  position: relative;
+  background: transparent;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin: 0 16px 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  border: 1px solid var(--border-glass);
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.luxury-mini-player:active {
+  transform: scale(0.98);
+}
+
+.mini-player-glass-bg {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 4, 6, 0.8);
+  backdrop-filter: blur(20px);
+  z-index: 0;
+}
+
+.mini-player-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  padding: 8px 16px 8px 8px;
+  gap: 12px;
+}
+
+.mini-player-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--ambient-primary);
+  z-index: 3;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 10px var(--ambient-glow);
+}
+
+.mini-art-wrapper {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.luxury-mini-art {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.mini-playing-indicator {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  background: var(--ambient-primary);
+  border-radius: 50%;
+  border: 2px solid var(--bg-base);
+  animation: pulseBeat 2s infinite;
+}
+
+.mini-player-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.mini-player-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.mini-player-artist {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mini-play-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--text-primary);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(255,255,255,0.2);
+  transition: transform 0.2s;
+}
+
+.mini-play-btn:active {
+  transform: scale(0.9);
+}
+
+@media (min-width: 769px) {
+  .luxury-mini-player {
+    display: none; /* Hidden on desktop */
+  }
+}

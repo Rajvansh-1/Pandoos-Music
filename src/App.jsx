@@ -2,11 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { PlayerProvider, usePlayer } from './context/PlayerContext.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import Sidebar from './components/Layout/Sidebar.jsx';
-import Topbar from './components/Layout/Topbar.jsx';
-import MobileNav from './components/Layout/MobileNav.jsx';
 import PlayerBar from './components/Player/PlayerBar.jsx';
-import MiniPlayer from './components/Player/MiniPlayer.jsx';
 import FullscreenPlayer from './components/Player/FullscreenPlayer.jsx';
+import MiniPlayer from './components/Player/MiniPlayer.jsx';
 import YouTubePlayer from './components/Player/YouTubePlayer.jsx';
 import Toast from './components/UI/Toast.jsx';
 import Home from './pages/Home.jsx';
@@ -25,7 +23,7 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
-function AppShell() {
+function ToastContainer() {
   const { state } = usePlayer();
   const { user } = useAuth();
 
@@ -68,7 +66,8 @@ function AppShell() {
   );
 }
 
-export default function App() {
+function MobileNav() {
+  const navigate = useNavigate();
   return (
     <BrowserRouter>
       <AuthProvider>

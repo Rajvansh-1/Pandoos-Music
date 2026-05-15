@@ -1,0 +1,53 @@
+.mood-widget {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-round);
+  padding: 8px 16px 8px 10px;
+  cursor: default;
+  backdrop-filter: blur(10px);
+  transition: background 0.3s ease;
+  user-select: none;
+}
+
+.mood-widget:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.mood-orb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--mood-color, #4ade80);
+  box-shadow:
+    0 0 8px var(--mood-color, #4ade80),
+    0 0 16px color-mix(in srgb, var(--mood-color, #4ade80) 50%, transparent);
+  animation: moodPulse 2s ease-in-out infinite alternate;
+  flex-shrink: 0;
+}
+
+@keyframes moodPulse {
+  0%   { box-shadow: 0 0 4px var(--mood-color), 0 0 8px color-mix(in srgb, var(--mood-color) 40%, transparent); transform: scale(0.9); }
+  100% { box-shadow: 0 0 10px var(--mood-color), 0 0 20px color-mix(in srgb, var(--mood-color) 60%, transparent); transform: scale(1.1); }
+}
+
+.mood-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mood-emoji {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.mood-label {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}

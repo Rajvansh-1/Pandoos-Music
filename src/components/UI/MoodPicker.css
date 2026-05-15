@@ -1,0 +1,72 @@
+.mood-picker-container {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 24px;
+  scrollbar-width: none;
+}
+
+.mood-picker-container::-webkit-scrollbar {
+  display: none;
+}
+
+.mood-grid {
+  display: flex;
+  gap: 16px;
+  padding: 8px 0;
+  width: max-content;
+}
+
+.mood-card {
+  position: relative;
+  min-width: 140px;
+  height: 140px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+}
+
+.mood-card-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, var(--mood-color) 0%, transparent 70%);
+  opacity: 0.1;
+  transition: opacity 0.4s ease;
+  z-index: 0;
+}
+
+.mood-card:hover {
+  transform: translateY(-8px) scale(1.05);
+  border-color: rgba(255,255,255,0.2);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px var(--mood-color);
+}
+
+.mood-card:hover .mood-card-bg {
+  opacity: 0.3;
+}
+
+.mood-emoji {
+  font-size: 3rem;
+  z-index: 1;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mood-card:hover .mood-emoji {
+  transform: scale(1.2) rotate(10deg);
+}
+
+.mood-label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.125rem;
+  z-index: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
