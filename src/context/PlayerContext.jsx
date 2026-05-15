@@ -4,6 +4,16 @@ import {
 } from 'react';
 import { fetchRelated, searchYouTube } from '../services/youtube.js';
 import { extractColors, applyAmbientColors } from '../services/colorExtractor.js';
+import { detectMood, updateListeningSignal, predictNextSongs } from '../services/moodEngine.js';
+// Gamification integration (lazy import to avoid circular deps)
+let _gamification = null;
+const getGamification = async () => {
+  if (!_gamification) {
+    const mod = await import('../stores/useGamificationStore.js');
+    _gamification = mod.useGamificationStore.getState();
+  }
+  return _gamification;
+};
 
 // ─── Initial State ─────────────────────────────────────────
 const initialState = {
@@ -34,6 +44,8 @@ const initialState = {
   // Gamification & Engagement
   playStats:      {},      // { songId: playCount }
   currentStreak:  0,       // days
+  // AI Mood
+  currentMood:    'chill', // detected mood
   lastPlayedDate: null,    // YYYY-MM-DD
   ambientColors:  null,    // Current extracted colors
 };
@@ -95,6 +107,9 @@ function reducer(state, action) {
     
     case 'SET_AMBIENT_COLORS':
       return { ...state, ambientColors: action.colors };
+
+    case 'SET_MOOD':
+      return { ...state, currentMood: action.mood };
 
     case 'SET_VOLUME':   return { ...state, volume: action.volume, isMuted: false };
     case 'SET_PLAYBACK_RATE': return { ...state, playbackRate: action.rate };
@@ -172,6 +187,15 @@ export function PlayerProvider({ children }) {
     }
   }, [state.currentSong?.id]); // eslint-disable-line
 
+  // ── AI Mood Detection — runs on each new song ──
+  useEffect(() => {
+    if (state.recentlyPlayed.length === 0) return;
+    const { mood } = detectMood(state.recentlyPlayed.slice(0, 8), state.likedSongs);
+    dispatch({ type: 'SET_MOOD', mood });
+    // Apply mood to html element for CSS theme system
+    document.documentElement.setAttribute('data-mood', mood);
+  }, [state.recentlyPlayed.length]); // eslint-disable-line
+
   // ── Progress polling ─────────────────────────────────────
   const startPoll = useCallback(() => {
     clearInterval(progressRef.current);
@@ -189,14 +213,14 @@ export function PlayerProvider({ children }) {
   const stopPoll = useCallback(() => clearInterval(progressRef.current), []);
 
   const advanceQueue = useCallback(async () => {
-    const { queue, queueIndex, shuffle, repeat, currentSong } = stateRef.current;
+    const { queue, queueIndex, shuffle, repeat, currentSong, currentMood, likedSongs, songs } = stateRef.current;
     if (!queue.length) return;
     if (repeat === 'one') {
       ytPlayerRef.current?.seekTo(0, true);
       ytPlayerRef.current?.playVideo();
       return;
     }
-    
+
     let next;
     let nextQueue = [...queue];
 
@@ -204,32 +228,49 @@ export function PlayerProvider({ children }) {
       next = Math.floor(Math.random() * queue.length);
     } else {
       next = queueIndex + 1;
-      
-      // AI DJ Infinity Engine
+
+      // AI DJ Infinity Engine — mood-aware
       if (next >= queue.length) {
         if (repeat === 'all') {
           next = 0;
         } else if (currentSong?.videoId && currentSong.source === 'youtube') {
           try {
-            const artist = currentSong.artist || '';
-            const allLikedIds = Array.from(stateRef.current.likedSongs);
-            
-            // AI Magic: Blend current artist with liked artist
-            const likedSongsAvailable = stateRef.current.songs.filter(s => allLikedIds.includes(s.id) && s.artist !== artist);
-            let randomLikedArtist = '';
-            if (likedSongsAvailable.length > 0) {
-              randomLikedArtist = likedSongsAvailable[Math.floor(Math.random() * likedSongsAvailable.length)].artist;
-            }
+            const existingIds = new Set(queue.map(q => q.id));
 
+            // Step 1: Try mood-based prediction from known songs
             let newTracks = [];
-            let djQuery = artist ? `${artist} songs` : '';
-            if (artist && randomLikedArtist) djQuery = `${artist} & ${randomLikedArtist} best audio`;
-
-            if (djQuery) {
-              const res = await searchYouTube(djQuery, 6);
-              newTracks = res.filter(r => !queue.some(q => q.id === r.id));
+            if (songs?.length > 0) {
+              const predicted = predictNextSongs(
+                currentSong,
+                currentMood,
+                songs,
+                existingIds,
+                likedSongs
+              );
+              newTracks = predicted.slice(0, 5);
             }
 
+            // Step 2: Fall back to YouTube search (mood-flavored query)
+            if (newTracks.length < 3) {
+              const artist = currentSong.artist || '';
+              const allLikedIds = Array.from(likedSongs);
+              const likedSongsAvailable = songs.filter(s => allLikedIds.includes(s.id) && s.artist !== artist);
+              const randomLikedArtist = likedSongsAvailable.length > 0
+                ? likedSongsAvailable[Math.floor(Math.random() * likedSongsAvailable.length)].artist
+                : '';
+
+              const djQuery = (artist && randomLikedArtist)
+                ? `${artist} & ${randomLikedArtist} best audio`
+                : artist ? `${artist} songs` : '';
+
+              if (djQuery) {
+                const res = await searchYouTube(djQuery, 6);
+                const fresh = res.filter(r => !existingIds.has(r.id));
+                newTracks = [...newTracks, ...fresh].slice(0, 6);
+              }
+            }
+
+            // Step 3: Fall back to related videos
             if (newTracks.length === 0) {
               const related = await fetchRelated(currentSong.videoId, 5);
               newTracks = related.filter(r => !queue.some(q => q.id === r.id));
@@ -248,7 +289,7 @@ export function PlayerProvider({ children }) {
         }
       }
     }
-    
+
     dispatch({ type: 'PLAY', song: nextQueue[next], queue: nextQueue, index: next });
   }, [stopPoll]);
 
@@ -265,6 +306,18 @@ export function PlayerProvider({ children }) {
       } else if (ytState === 2) {   // PAUSED
         dispatch({ type: 'PAUSE' }); stopPoll();
       } else if (ytState === 0) {   // ENDED
+        // Record completion signal + XP
+        if (stateRef.current.currentSong?.id) {
+          updateListeningSignal(stateRef.current.currentSong.id, 'complete');
+          // Award XP for song completion
+          getGamification().then(g => {
+            g.recordSongPlayed(
+              stateRef.current.currentMood || 'chill',
+              true,
+              stateRef.current.duration || 0
+            );
+          });
+        }
         stopPoll(); advanceQueue();
       }
     };
@@ -346,7 +399,14 @@ export function PlayerProvider({ children }) {
       if (stateRef.current.isPlaying) { ytPlayerRef.current?.pauseVideo(); dispatch({ type: 'PAUSE' }); } 
       else { ytPlayerRef.current?.playVideo();  dispatch({ type: 'RESUME' }); }
     }, []),
-    nextTrack: useCallback(() => advanceQueue(), [advanceQueue]),
+    nextTrack: useCallback(() => {
+      // Record skip if song was skipped early
+      const { currentSong, currentTime } = stateRef.current;
+      if (currentSong?.id && currentTime < 15) {
+        updateListeningSignal(currentSong.id, 'skip');
+      }
+      advanceQueue();
+    }, [advanceQueue]),
     prevTrack: useCallback(() => {
       const { queue, queueIndex, currentTime } = stateRef.current;
       if (currentTime > 3) { ytPlayerRef.current?.seekTo(0, true); return; }
@@ -366,7 +426,16 @@ export function PlayerProvider({ children }) {
       const next  = modes[(modes.indexOf(stateRef.current.repeat) + 1) % modes.length];
       dispatch({ type: 'SET_REPEAT', repeat: next });
     }, []),
-    toggleLike:       useCallback((id) => dispatch({ type: 'TOGGLE_LIKE', id }), []),
+    toggleLike: useCallback((id) => {
+      const { likedSongs } = stateRef.current;
+      // Record like/unlike signal + XP
+      const isLiking = !likedSongs.has(id);
+      updateListeningSignal(id, isLiking ? 'like' : 'unlike');
+      if (isLiking) {
+        getGamification().then(g => g.recordLike());
+      }
+      dispatch({ type: 'TOGGLE_LIKE', id });
+    }, []),
     toggleFullscreen: useCallback(() => dispatch({ type: 'TOGGLE_FULLSCREEN' }), []),
     toggleQueue:      useCallback(() => dispatch({ type: 'TOGGLE_QUEUE' }), []),
     setSleepTimer: useCallback((minutes) => {

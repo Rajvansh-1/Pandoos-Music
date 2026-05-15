@@ -1,21 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePlayer } from '../context/PlayerContext.jsx';
-import SongCard from '../components/UI/SongCard.jsx';
+import { MOODS } from '../services/moodEngine.js';
 import SongRow from '../components/UI/SongRow.jsx';
-import MoodPicker from '../components/UI/MoodPicker.jsx';
+import SongCard from '../components/UI/SongCard.jsx';
 import PandaLogo from '../components/Brand/PandaLogo.jsx';
-import { fetchTrendingMusic } from '../services/youtube.js';
-import {
-  buildTasteProfile,
-  buildRecommendationSections,
-  fetchMadeForYou,
-} from '../services/recommendations.js';
+import MoodWidget from '../components/UI/MoodWidget.jsx';
+import PandaCompanion from '../features/panda/PandaCompanion';
+import Skeleton from '../components/UI/Skeleton.jsx';
+import { fetchTrendingMusic, DEMO_SONGS } from '../services/youtube.js';
+import { buildTasteProfile, buildRecommendationSections, fetchMadeForYou } from '../services/recommendations.js';
 import './Home.css';
 
 export default function Home() {
-  const { state, actions } = usePlayer();
   const navigate = useNavigate();
+  const { state, actions } = usePlayer();
+  const { currentMood, currentStreak } = state;
 
   const [isLoading, setIsLoading] = useState(true);
   const [trendingSongs, setTrendingSongs] = useState([]);
@@ -26,22 +26,26 @@ export default function Home() {
   const [isPersonalized, setIsPersonalized] = useState(false);
   const builtRef = useRef(false);
 
+  const moodInfo = MOODS[currentMood] || MOODS.chill;
+
   // Greeting based on time
   const hour = new Date().getHours();
   let greeting = 'Good evening';
   if (hour >= 5 && hour < 12) greeting = 'Good morning';
   else if (hour >= 12 && hour < 17) greeting = 'Good afternoon';
 
-  // Step 1: Load base trending songs (fast, 1 API unit)
   useEffect(() => {
     const src = state.songs.length > 0 ? Promise.resolve(state.songs) : fetchTrendingMusic(20);
     src.then(songs => {
       setTrendingSongs(songs);
       setIsLoading(false);
-    }).catch(() => setIsLoading(false));
+    }).catch((err) => {
+      console.warn("YouTube API failed, falling back to DEMO_SONGS", err);
+      setTrendingSongs(DEMO_SONGS);
+      setIsLoading(false);
+    });
   }, []); // eslint-disable-line
 
-  // Step 2: Once data is ready, build taste profile + personalized sections
   useEffect(() => {
     if (isLoading || builtRef.current) return;
 
@@ -59,19 +63,16 @@ export default function Home() {
       builtRef.current = true;
       setSectionsLoading(true);
 
-      // Build "Made For You" top row
       fetchMadeForYou(profile.topArtists, trendingSongs).then(songs => {
         setMadeForYou(songs);
       });
 
-      // Build "Because you like X" sections
       const seenIds = new Set(state.recentlyPlayed.map(s => s.id));
       buildRecommendationSections(profile, seenIds).then(sections => {
         setTasteSections(sections);
         setSectionsLoading(false);
       });
     } else {
-      // No taste data yet — use trending as fallback
       setMadeForYou(trendingSongs.slice(0, 6));
       setSectionsLoading(false);
     }
@@ -90,39 +91,34 @@ export default function Home() {
 
   return (
     <div className="home-container">
-
-      {/* ── Cinematic Hero ── */}
+      {/* ── Mood-Aware Hero ── */}
       <section className="home-hero luxury-hero">
-        <div className="hero-bg-layer"></div>
+        <div 
+          className="hero-bg-layer" 
+          style={{ background: `linear-gradient(180deg, ${moodInfo.color}33 0%, transparent 100%)` }}
+        />
         <div className="hero-content">
-          <div className="hero-header">
-            <PandaLogo size={60} className="hero-panda" />
+          <div className="hero-top-badges">
+            <MoodWidget />
+            {currentStreak > 0 && (
+              <div className="streak-badge" title={`${currentStreak} days listening streak!`}>
+                <span className="streak-icon">🔥</span>
+                <span className="streak-count">{currentStreak} day streak</span>
+              </div>
+            )}
+          </div>
+          
+          <div className="hero-header" style={{ marginTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
             <div className="hero-greeting-wrapper">
               <div className="hero-subtitle">
                 {isPersonalized ? 'Your Personal Mix' : 'Daily Mix'}
               </div>
               <h1 className="home-greeting">{greeting}</h1>
             </div>
+            <div className="hero-panda-container" style={{ marginBottom: -10 }}>
+              <PandaCompanion variant="hero" size={100} />
+            </div>
           </div>
-
-          {isPersonalized && tasteProfile?.topArtists?.length > 0 ? (
-            <div className="hero-taste-chips">
-              <span className="taste-label">Your taste:</span>
-              {tasteProfile.topArtists.slice(0, 4).map(artist => (
-                <span
-                  key={artist}
-                  className="taste-chip"
-                  onClick={() => navigate(`/search?q=${encodeURIComponent(artist)}`)}
-                >
-                  {artist}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <div className="hero-description">
-              Jump back into your rhythm or discover something entirely new, curated just for your mood today.
-            </div>
-          )}
 
           <div className="hero-actions">
             <button
@@ -144,15 +140,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Visual Mood Picker ── */}
-      <section className="content-section" style={{ marginTop: -40, position: 'relative', zIndex: 2 }}>
-        <h2 className="section-title">Vibe Check</h2>
-        <MoodPicker />
-      </section>
-
       {/* ── Jump Back In (Recently Played) ── */}
       {quickPicks.length > 0 && (
-        <section className="content-section">
+        <section className="content-section" style={{ marginTop: -20, position: 'relative', zIndex: 2 }}>
           <h2 className="section-title">Jump Back In</h2>
           <div className="quick-picks-grid">
             {quickPicks.map((song, i) => (
@@ -160,6 +150,7 @@ export default function Home() {
                 key={song.id}
                 className="quick-pick-card"
                 onClick={() => actions.playSong(song, quickPicks, i)}
+                style={{ '--i': i }}
               >
                 <img src={song.coverUrl} alt="" className="quick-pick-art" />
                 <div className="quick-pick-info">{song.title}</div>
@@ -180,21 +171,21 @@ export default function Home() {
             </span>
           </h2>
           {sectionsLoading && madeForYou.length === 0 ? (
-            <div className="recs-skeleton-row">
-              {[...Array(6)].map((_, i) => <div key={i} className="recs-skeleton-card" />)}
+            <div className="horizontal-scroll">
+              {[...Array(6)].map((_, i) => <Skeleton key={i} height="240px" radius="16px" />)}
             </div>
           ) : (
-            <div className="card-grid">
+            <div className="horizontal-scroll">
               {madeForYou.map((song, i) => (
-                <SongCard key={song.id} song={song} queue={madeForYou} index={i} />
+                <SongCard key={song.id} song={song} queue={madeForYou} index={i} style={{ '--i': i }} />
               ))}
             </div>
           )}
         </section>
       )}
 
-      {/* ── Personalized Taste Sections (Spotify-style "Because you like X") ── */}
-      {tasteSections.map(section => (
+      {/* ── Personalized Taste Sections ── */}
+      {tasteSections.map((section, sIdx) => (
         <section key={section.id} className="content-section">
           <div className="taste-section-header">
             <div>
@@ -211,49 +202,15 @@ export default function Home() {
               )}
             </div>
           </div>
-          <div className="card-grid">
+          <div className="horizontal-scroll">
             {section.songs.map((song, i) => (
-              <SongCard key={song.id} song={song} queue={section.songs} index={i} />
+              <SongCard key={song.id} song={song} queue={section.songs} index={i} style={{ '--i': i }} />
             ))}
           </div>
         </section>
       ))}
 
-      {/* ── Sections loading skeleton ── */}
-      {sectionsLoading && isPersonalized && tasteSections.length === 0 && (
-        <section className="content-section">
-          <div className="recs-building-indicator">
-            <span className="recs-building-dot" />
-            <span className="recs-building-dot" />
-            <span className="recs-building-dot" />
-            <span className="recs-building-text">Building your taste profile…</span>
-          </div>
-          <div className="recs-skeleton-row">
-            {[...Array(4)].map((_, i) => <div key={i} className="recs-skeleton-card" />)}
-          </div>
-        </section>
-      )}
-
-      {/* ── No taste data yet? Show onboarding nudge ── */}
-      {!isPersonalized && !sectionsLoading && quickPicks.length === 0 && (
-        <section className="content-section">
-          <div className="taste-onboarding-card">
-            <div className="taste-onboarding-icon">🎧</div>
-            <h3 className="taste-onboarding-title">Your personal feed is warming up</h3>
-            <p className="taste-onboarding-desc">
-              Play a few songs you love. Pandoos will learn your taste and start curating music just for you — like Spotify, but better.
-            </p>
-            <button
-              className="btn-primary luxury-btn taste-onboarding-btn"
-              onClick={() => navigate('/search')}
-            >
-              <DiscoverIcon /> Find Your Music
-            </button>
-          </div>
-        </section>
-      )}
-
-      {/* ── Trending Globally (always show, smaller when personalized) ── */}
+      {/* ── Trending Globally ── */}
       {topHits.length > 0 && (
         <section className="content-section pb-32">
           <div className="section-header-row">
@@ -265,7 +222,7 @@ export default function Home() {
           </div>
           <div className="list-container">
             {topHits.map((song, i) => (
-              <SongRow key={song.id} song={song} queue={topHits} index={i} />
+              <SongRow key={song.id} song={song} queue={topHits} index={i} style={{ '--i': i }} />
             ))}
           </div>
         </section>
@@ -277,4 +234,3 @@ export default function Home() {
 
 const PlayIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>;
 const PlayIconSmall = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>;
-const DiscoverIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>;

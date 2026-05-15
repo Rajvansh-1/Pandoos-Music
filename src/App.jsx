@@ -6,12 +6,19 @@ import PlayerBar from './components/Player/PlayerBar.jsx';
 import FullscreenPlayer from './components/Player/FullscreenPlayer.jsx';
 import MiniPlayer from './components/Player/MiniPlayer.jsx';
 import YouTubePlayer from './components/Player/YouTubePlayer.jsx';
-import Home from './pages/Home.jsx';
-import Search from './pages/Search.jsx';
-import Library from './pages/Library.jsx';
-import Playlist from './pages/Playlist.jsx';
-import Artist from './pages/Artist.jsx';
-import Stats from './pages/Stats.jsx';
+import { lazy, Suspense } from 'react';
+import Home from './pages/Home.jsx'; // Home is kept eager for fast LCP
+const Search = lazy(() => import('./pages/Search.jsx'));
+const Library = lazy(() => import('./pages/Library.jsx'));
+const Playlist = lazy(() => import('./pages/Playlist.jsx'));
+const Artist = lazy(() => import('./pages/Artist.jsx'));
+const Stats = lazy(() => import('./pages/Stats.jsx'));
+import QueuePanel from './components/Player/QueuePanel.jsx';
+import SleepTimerWidget from './components/UI/SleepTimerWidget.jsx';
+import MoodReactiveBackground from './features/panda/MoodBackground'; 
+import BadgeUnlockCelebration from './features/gamification/BadgeUnlock';
+import { useGamificationStore } from './stores/useGamificationStore';
+import PandaLogo from './components/Brand/PandaLogo.jsx';
 
 function ToastContainer() {
   const { state } = usePlayer();
@@ -52,6 +59,12 @@ function MobileNav() {
 
 export default function App() {
   const { state } = usePlayer();
+  const { startSession, endSession } = useGamificationStore();
+
+  useEffect(() => {
+    startSession();
+    return () => endSession();
+  }, [startSession, endSession]);
 
   return (
     /*
@@ -66,6 +79,9 @@ export default function App() {
      *  No position:fixed needed — zero clipping issues.
      */
     <div className="app-shell">
+      {/* Dynamic Background System */}
+      <MoodReactiveBackground />
+      
       {/* Hidden audio engine */}
       <YouTubePlayer />
 
@@ -89,14 +105,16 @@ export default function App() {
           </header>
 
           <div className="page-content" id="scrollable-content">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/search" element={<Search />} />
-              <Route path="/library" element={<Library />} />
-              <Route path="/playlist/:id" element={<Playlist />} />
-              <Route path="/artist/:name" element={<Artist />} />
-              <Route path="/stats" element={<Stats />} />
-            </Routes>
+            <Suspense fallback={<div className="empty-state"><PandaLogo size={60} className="panda-sleepy" /></div>}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/search" element={<Search />} />
+                <Route path="/library" element={<Library />} />
+                <Route path="/playlist/:id" element={<Playlist />} />
+                <Route path="/artist/:name" element={<Artist />} />
+                <Route path="/stats" element={<Stats />} />
+              </Routes>
+            </Suspense>
           </div>
         </main>
       </div>
@@ -108,9 +126,12 @@ export default function App() {
       <MiniPlayer />
       <MobileNav />
 
-      {/* Fullscreen player + toasts */}
+      {/* Overlays */}
+      <QueuePanel />
+      <SleepTimerWidget />
       {state.showFullscreen && <FullscreenPlayer />}
       <ToastContainer />
+      <BadgeUnlockCelebration />
     </div>
   );
 }

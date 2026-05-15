@@ -1,0 +1,132 @@
+/* ── Pandoos — Mood Reactive Background ── */
+
+.mood-background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* ── Primary gradient (powered by CSS mood tokens) ── */
+.mood-gradient-layer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    var(--mood-bg-start, rgba(74, 222, 128, 0.12)) 0%,
+    var(--mood-bg-end, rgba(4, 4, 6, 0)) 60%
+  );
+  transition: background var(--transition-mood, 0.8s ease);
+}
+
+/* ── Album art glow ── */
+.mood-album-glow {
+  position: absolute;
+  inset: 0;
+  transition: background 1s ease;
+}
+
+/* ── Aurora wave ── */
+.mood-aurora {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  height: 60%;
+  background: linear-gradient(
+    90deg,
+    var(--mood-primary, #4ade80)08,
+    var(--mood-secondary, #22d3ee)12,
+    var(--mood-primary, #4ade80)06
+  );
+  background-size: 300% 100%;
+  filter: blur(60px);
+  animation: aurora-shift 12s ease-in-out infinite;
+  opacity: 0.6;
+}
+
+/* ── Energy rings (energetic mode) ── */
+.energy-rings {
+  position: absolute;
+  bottom: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.energy-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 2px solid var(--mood-primary, #f59e0b);
+  opacity: 0;
+  animation: energy-pulse 1.5s ease-out infinite;
+}
+
+/* ── Particles Container ── */
+.mood-particles-container {
+  position: absolute;
+  inset: 0;
+}
+
+/* ── Base particle ── */
+.mood-particle {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* Floating dots / circles */
+.mood-particle--dot,
+.mood-particle--circle {
+  background: var(--mood-particle, #4ade80);
+  opacity: 0;
+  animation: particle-float var(--dur, 4s) ease-in-out infinite;
+}
+
+/* Rain drops */
+.mood-particle--rain {
+  background: linear-gradient(to bottom, var(--mood-particle, #7b9ee8), transparent);
+  border-radius: 1px;
+  animation: rain-drop var(--dur, 2.5s) linear infinite;
+}
+
+/* Star / heart emoji particles */
+.mood-particle--star,
+.mood-particle--heart {
+  font-size: inherit;
+  animation: particle-float var(--dur, 3s) ease-in-out infinite;
+  background: none;
+}
+
+/* Energy bolts */
+.mood-particle--energy {
+  background: radial-gradient(circle, var(--mood-particle, #f59e0b), transparent);
+  animation: particle-float var(--dur, 1.5s) ease-in-out infinite;
+}
+
+/* Speed variants */
+.mood-particle--slow   { --dur: 5s; }
+.mood-particle--medium { --dur: 3s; }
+.mood-particle--fast   { --dur: 1.6s; }
+
+/* ── Bottom vignette (keeps text readable) ── */
+.mood-vignette {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 40%,
+    rgba(4, 4, 6, 0.6) 80%,
+    var(--bg-base, #040406) 100%
+  );
+}

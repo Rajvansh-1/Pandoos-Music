@@ -1,0 +1,293 @@
+/* ── Queue Panel ─────────────────────────────────────────────────────────── */
+
+.queue-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+.queue-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 90px; /* above PlayerBar */
+  width: 340px;
+  max-width: 92vw;
+  z-index: 201;
+  background: rgba(12, 12, 18, 0.97);
+  backdrop-filter: blur(40px);
+  border-left: 1px solid var(--border-glass);
+  display: flex;
+  flex-direction: column;
+  animation: slideInRight 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  box-shadow: -20px 0 60px rgba(0,0,0,0.6);
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Header ── */
+.queue-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border-glass);
+  flex-shrink: 0;
+}
+
+.queue-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+.queue-close-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+}
+
+/* ── Body ── */
+.queue-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 0 24px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-active) transparent;
+}
+
+.queue-section {
+  padding: 16px 0 8px;
+}
+
+.queue-section + .queue-section {
+  border-top: 1px solid var(--border-glass);
+  margin-top: 8px;
+}
+
+.queue-section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  padding: 0 16px 12px;
+}
+
+/* ── Queue Item ── */
+.queue-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-radius: 0;
+  min-height: 56px;
+}
+
+.queue-item:hover,
+.queue-item:focus-visible {
+  background: rgba(255,255,255,0.05);
+  outline: none;
+}
+
+.queue-item.is-active {
+  background: rgba(255,255,255,0.05);
+}
+
+.queue-item.is-active .queue-item-title {
+  color: var(--ambient-primary);
+}
+
+/* Art */
+.queue-item-art-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.queue-item-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.queue-item-art-placeholder {
+  width: 100%;
+  height: 100%;
+  background: var(--bg-active);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  border-radius: 6px;
+}
+
+/* Now playing bars animation */
+.queue-item-playing-indicator {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.queue-item-playing-indicator span {
+  display: block;
+  width: 3px;
+  background: var(--ambient-primary);
+  border-radius: 2px;
+  animation: queueBeat 0.8s ease-in-out infinite alternate;
+}
+
+.queue-item-playing-indicator span:nth-child(1) { animation-duration: 0.7s; height: 60%; }
+.queue-item-playing-indicator span:nth-child(2) { animation-duration: 1.0s; height: 100%; animation-delay: 0.15s; }
+.queue-item-playing-indicator span:nth-child(3) { animation-duration: 0.85s; height: 70%; animation-delay: 0.3s; }
+
+@keyframes queueBeat {
+  0%   { transform: scaleY(0.4); }
+  100% { transform: scaleY(1); }
+}
+
+/* Info */
+.queue-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.queue-item-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.queue-item-artist {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Actions */
+.queue-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.queue-ai-badge {
+  font-size: 0.6rem;
+  font-weight: 900;
+  background: var(--ambient-primary);
+  color: #000;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+.queue-mood-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mood-color, #4ade80);
+  box-shadow: 0 0 6px var(--mood-color, #4ade80);
+  flex-shrink: 0;
+}
+
+.queue-like-btn {
+  width: 32px;
+  height: 32px;
+  opacity: 0;
+  transition: opacity 0.2s, color 0.2s;
+  color: var(--text-muted);
+}
+
+.queue-like-btn.liked {
+  opacity: 1;
+  color: var(--brand-red, #ff4b4b);
+}
+
+.queue-item:hover .queue-like-btn {
+  opacity: 1;
+}
+
+/* Empty state */
+.queue-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  gap: 12px;
+  opacity: 0.5;
+  font-size: 2rem;
+}
+
+.queue-empty p {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* Small mood orb in label */
+.mood-orb-sm {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mood-color, #4ade80);
+  box-shadow: 0 0 6px var(--mood-color, #4ade80);
+  flex-shrink: 0;
+  animation: moodPulse 2s ease-in-out infinite alternate;
+}
+
+/* Mobile: full-width panel */
+@media (max-width: 768px) {
+  .queue-panel {
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    bottom: 120px;
+    border-left: none;
+    border-top: 1px solid var(--border-glass);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    animation: slideUpPanel 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  }
+
+  @keyframes slideUpPanel {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+}

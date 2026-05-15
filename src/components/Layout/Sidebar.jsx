@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import PandaLogo from '../Brand/PandaLogo.jsx';
 import { usePlayer } from '../../context/PlayerContext.jsx';
+import XPProgress from '../../features/gamification/XPProgress';
 
 export default function Sidebar() {
   const { state } = usePlayer();
@@ -14,10 +15,9 @@ export default function Sidebar() {
         <span className="logo-text">Pandoos</span>
       </div>
       
-      {/* ── Bamboo Streaks ── */}
-      <div className="streak-badge" title={`${streak} Day Streak!`}>
-        <span className="streak-icon">🎋</span>
-        <span className="streak-count">{streak}</span>
+      {/* ── Gamification XP ── */}
+      <div style={{ padding: '0 16px' }}>
+        <XPProgress compact />
       </div>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '32px', marginTop: '16px' }}>

@@ -1,48 +1,92 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;600;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;600;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
+@import './moods.css';
+@import './animations.css';
 
 /* ── PANDOOS BAMBOO DARK GLASS TOKENS ── */
 :root {
-  /* Dynamic Ambient Variables */
-  --ambient-primary: #4ADE80; /* Bamboo Green */
-  --ambient-secondary: #040406;
-  --ambient-glow: rgba(74, 222, 128, 0.4);
-  --ambient-gradient: linear-gradient(180deg, rgba(74, 222, 128, 0.15) 0%, rgba(4,4,6,1) 100%);
+  /* ── Dynamic Ambient Variables (overridden by mood themes) ── */
+  --ambient-primary:   #4ADE80;
+  --ambient-secondary: #22d3ee;
+  --ambient-glow:      rgba(74, 222, 128, 0.4);
+  --ambient-gradient:  linear-gradient(180deg, rgba(74, 222, 128, 0.15) 0%, rgba(4,4,6,1) 100%);
   --ambient-gradient-subtle: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
 
-  /* Core Colors */
-  --bg-base: #040406; /* Ultra deep black */
-  --bg-surface: rgba(255, 255, 255, 0.02);
-  --bg-active: rgba(255, 255, 255, 0.06);
-  --border-glass: rgba(255, 255, 255, 0.05);
-  
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.8);
-  --text-muted: rgba(255, 255, 255, 0.4);
-  
-  --brand-green: #4ADE80;
-  --brand-red: #ff4b4b;
+  /* ── Core Background System ── */
+  --bg-base:     #040406;
+  --bg-surface:  rgba(255, 255, 255, 0.025);
+  --bg-active:   rgba(255, 255, 255, 0.06);
+  --bg-elevated: rgba(255, 255, 255, 0.04);
+  --border-glass: rgba(255, 255, 255, 0.06);
+  --border-subtle: rgba(255, 255, 255, 0.03);
 
-  /* Typography */
-  --font-base: 'Inter', system-ui, sans-serif;
-  --font-display: 'Outfit', system-ui, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  /* ── Text System ── */
+  --text-primary:   #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.75);
+  --text-muted:     rgba(255, 255, 255, 0.38);
+  --text-disabled:  rgba(255, 255, 255, 0.2);
 
-  /* Shadows & Blur */
-  --shadow-sm: 0 4px 12px rgba(0,0,0,0.6);
+  /* ── Brand Colors ── */
+  --brand-green:    #4ADE80;
+  --brand-bamboo:   #6EE7B7;
+  --brand-red:      #ff4b4b;
+  --brand-gold:     #F59E0B;
+
+  /* ── Panda Companion Colors ── */
+  --panda-white:    #f0f0f0;
+  --panda-black:    #1a1a1a;
+  --panda-eye:      #2d2d2d;
+  --panda-glow:     rgba(74, 222, 128, 0.5);
+  --panda-shadow:   rgba(0, 0, 0, 0.6);
+
+  /* ── Gamification / XP Level Colors ── */
+  --xp-cub:        #94a3b8;  /* Level 1-4:   Panda Cub */
+  --xp-bamboo:     #4ade80;  /* Level 5-9:   Bamboo Learner */
+  --xp-seeker:     #38bdf8;  /* Level 10-19: Vibe Seeker */
+  --xp-master:     #a78bfa;  /* Level 20-29: Mood Master */
+  --xp-legend:     #fbbf24;  /* Level 30+:   Panda Legend */
+  --xp-bar-bg:     rgba(255, 255, 255, 0.06);
+
+  /* ── Badge Rarity Colors ── */
+  --badge-common:   #94a3b8;
+  --badge-rare:     #60a5fa;
+  --badge-epic:     #c084fc;
+  --badge-legendary: #fbbf24;
+
+  /* ── Typography ── */
+  --font-base:    'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* ── Shadows & Blur ── */
+  --shadow-xs:    0 2px 6px rgba(0,0,0,0.4);
+  --shadow-sm:    0 4px 12px rgba(0,0,0,0.6);
+  --shadow-md:    0 8px 24px rgba(0,0,0,0.7);
   --shadow-float: 0 16px 40px rgba(0,0,0,0.8);
-  --blur-panel: blur(40px);
+  --shadow-glow:  0 0 20px var(--ambient-glow);
+  --blur-sm:      blur(8px);
+  --blur-panel:   blur(40px);
+  --blur-heavy:   blur(80px);
 
-  /* Geometry */
-  --radius-sm: 8px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
-  --radius-xl: 32px;
+  /* ── Geometry ── */
+  --radius-xs:    4px;
+  --radius-sm:    8px;
+  --radius-md:    16px;
+  --radius-lg:    24px;
+  --radius-xl:    32px;
   --radius-round: 999px;
-  
-  /* Transitions */
-  --transition-fast: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  --transition-base: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  --transition-spring: 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Transitions ── */
+  --transition-instant: 0.1s ease;
+  --transition-fast:    0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --transition-base:    0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --transition-spring:  0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-mood:    0.8s ease;
+
+  /* ── Capacitor / Mobile Safe Areas ── */
+  --safe-top:    env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left:   env(safe-area-inset-left, 0px);
+  --safe-right:  env(safe-area-inset-right, 0px);
 }
 
 /* ── RESET & BASE ── */

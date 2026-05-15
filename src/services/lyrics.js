@@ -1,31 +1,33 @@
 /**
- * Pandoos Music — Lightning Lyrics Engine ⚡
- * 
- * Multi-source parallel fetch with intelligent fallback chain:
- * 1. LRCLib /api/get (exact match — fastest for known tracks)
- * 2. LRCLib /api/search (fuzzy match — catches variations)
- * 3. lyrics.ovh (plain text fallback)
- * 
- * All sources are raced in parallel. First synced result wins instantly.
- * Results are cached aggressively in localStorage for instant replay.
+ * Pandoos Music — Lightning Lyrics Engine v3 ⚡
+ *
+ * Multi-source parallel race with Bollywood/Hindi support:
+ * 1. LRCLib /api/get  — exact match, fastest for English/known tracks
+ * 2. LRCLib /api/search — fuzzy match, catches variations
+ * 3. Happi.dev — best Bollywood/Hindi coverage (free tier)
+ * 4. lyrics.ovh — plain text English fallback
+ *
+ * Fixes vs v2:
+ * - cleanForSearch: no longer strips parentheses (Bollywood song names use them)
+ * - Label artist detection: T-Series etc → skips for LRCLib, uses title only
+ * - Scroll: scrollIntoView replaces broken offsetTop calculation
+ * - Happi.dev source added for Hindi songs
  */
 
 const memCache = new Map();
-const STORAGE_KEY = 'pandoos_lyrics_cache';
-const MAX_CACHE = 100;
+const STORAGE_KEY = 'pandoos_lyrics_v3';
+const MAX_CACHE = 150;
 
-// ── Persistent cache helpers ──────────────────────────────────
+// ── Persistent cache helpers ────────────────────────────────────────────────
 function loadDiskCache() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-  } catch { return {}; }
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+  catch { return {}; }
 }
 
 function saveDiskCache(cache) {
   try {
     const keys = Object.keys(cache);
     if (keys.length > MAX_CACHE) {
-      // Evict oldest half
       keys.slice(0, Math.floor(keys.length / 2)).forEach(k => delete cache[k]);
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cache));
@@ -35,10 +37,7 @@ function saveDiskCache(cache) {
 function getCached(key) {
   if (memCache.has(key)) return memCache.get(key);
   const disk = loadDiskCache();
-  if (disk[key]) {
-    memCache.set(key, disk[key]);
-    return disk[key];
-  }
+  if (disk[key]) { memCache.set(key, disk[key]); return disk[key]; }
   return null;
 }
 
@@ -49,184 +48,210 @@ function setCache(key, data) {
   saveDiskCache(disk);
 }
 
-// ── Clean helpers ─────────────────────────────────────────────
+// ── Known music label channels (not real artists) ───────────────────────────
+const MUSIC_LABELS = new Set([
+  't-series', 'tseries', 'sony music', 'eros now', 'zee music',
+  'saregama', 'tips music', 'universal music', 'warner music',
+  'yrf music', 'dharma music', 'jio saavn', 'jiosaavn',
+  'speed records', 'venus music', 'shemaroo', 'rajshri music',
+  'viacom18 music', 'color tv', 'star music',
+]);
+
+function isLabel(artist) {
+  return MUSIC_LABELS.has((artist || '').toLowerCase().trim());
+}
+
+// ── Clean for search ─────────────────────────────────────────────────────────
+// v3: Only remove YouTube noise — preserve Bollywood movie names in parentheses
 function cleanForSearch(str) {
+  if (!str) return '';
   return str
-    .replace(/\(.*?\)/g, '')
-    .replace(/\[.*?\]/g, '')
-    .replace(/\{.*?\}/g, '')
-    .replace(/ft\..*$/i, '')
-    .replace(/feat\..*$/i, '')
-    .replace(/official.*$/i, '')
-    .replace(/audio.*$/i, '')
-    .replace(/video.*$/i, '')
-    .replace(/lyric.*$/i, '')
-    .replace(/[^\w\s'-]/g, '')
+    // Remove YouTube noise suffixes only
+    .replace(/\s*(?:official\s+(?:video|audio|music\s+video|lyric\s+video|lyrics|mv|visualizer|teaser|trailer|song))/gi, '')
+    .replace(/\s*(?:full\s+(?:video|audio|song|hd|4k))/gi, '')
+    .replace(/\s*\|\s*(?:4k|hd|hq|1080p|720p)\s*$/gi, '')
+    // Remove trailing " - YouTube" etc
+    .replace(/\s*-\s*youtube\s*$/gi, '')
+    // Collapse whitespace
     .replace(/\s+/g, ' ')
     .trim();
 }
 
-// ── LRC Parser ────────────────────────────────────────────────
+// ── LRC Parser ───────────────────────────────────────────────────────────────
 function parseSyncedLyrics(lrcString) {
   if (!lrcString) return [];
   const lines = lrcString.split('\n');
   const result = [];
-  const timeRegex = /\[(\d{2}):(\d{2})\.(\d{2,3})\]/;
-  
+  // Support both [mm:ss.xx] and [mm:ss.xxx]
+  const timeRegex = /\[(\d{1,2}):(\d{2})\.(\d{2,3})\]/g;
+
   for (const line of lines) {
-    const match = line.match(timeRegex);
+    timeRegex.lastIndex = 0;
+    const match = timeRegex.exec(line);
     if (match) {
       const min = parseInt(match[1], 10);
       const sec = parseInt(match[2], 10);
-      const msLine = match[3];
-      const ms = msLine.length === 2 ? parseInt(msLine, 10) * 10 : parseInt(msLine, 10);
+      const msStr = match[3];
+      const ms = msStr.length === 2 ? parseInt(msStr, 10) * 10 : parseInt(msStr, 10);
       const time = min * 60 + sec + ms / 1000;
-      const text = line.replace(timeRegex, '').trim();
+      const text = line.replace(/\[\d{1,2}:\d{2}\.\d{2,3}\]/g, '').trim();
       if (text) result.push({ time, text });
     }
   }
   return result;
 }
 
-// ── Source 1: LRCLib exact match (fastest) ────────────────────
+// ── Source 1: LRCLib exact ────────────────────────────────────────────────────
 async function fetchFromLRCLibExact(artist, title, duration) {
-  const params = new URLSearchParams({
-    track_name: title,
-    artist_name: artist,
-  });
+  // Skip label artists for exact match — they won't be in LRCLib
+  const searchArtist = isLabel(artist) ? '' : artist;
+
+  const params = new URLSearchParams({ track_name: title });
+  if (searchArtist) params.set('artist_name', searchArtist);
   if (duration && duration > 0) params.set('duration', String(Math.round(duration)));
-  
+
   const res = await fetch(`https://lrclib.net/api/get?${params}`, {
-    headers: { 'User-Agent': 'Pandoos Music v2.0 (https://github.com/pandoos-music)' }
+    headers: { 'User-Agent': 'Pandoos Music v3.0' },
+    signal: AbortSignal.timeout(4000),
   });
-  
   if (!res.ok) return null;
   const data = await res.json();
-  
-  if (data.syncedLyrics) {
-    return { plain: data.plainLyrics || null, synced: parseSyncedLyrics(data.syncedLyrics) };
-  }
-  if (data.plainLyrics) {
-    return { plain: data.plainLyrics, synced: [] };
-  }
+  if (data.syncedLyrics) return { plain: data.plainLyrics || null, synced: parseSyncedLyrics(data.syncedLyrics) };
+  if (data.plainLyrics)  return { plain: data.plainLyrics, synced: [] };
   return null;
 }
 
-// ── Source 2: LRCLib search (fuzzy, catches more songs) ───────
+// ── Source 2: LRCLib search (fuzzy) ─────────────────────────────────────────
 async function fetchFromLRCLibSearch(artist, title) {
-  const query = `${title} ${artist}`;
+  // For label channels, search title only; otherwise "title artist"
+  const query = isLabel(artist) ? title : `${title} ${artist}`;
   const res = await fetch(
     `https://lrclib.net/api/search?q=${encodeURIComponent(query)}`,
-    { headers: { 'User-Agent': 'Pandoos Music v2.0' } }
+    {
+      headers: { 'User-Agent': 'Pandoos Music v3.0' },
+      signal: AbortSignal.timeout(5000),
+    }
   );
-  
   if (!res.ok) return null;
   const data = await res.json();
-  
-  if (!data || !data.length) return null;
-  
-  // Find best match — prefer one with synced lyrics
-  const withSynced = data.find(d => d.syncedLyrics);
-  const best = withSynced || data[0];
-  
-  if (best.syncedLyrics) {
-    return { plain: best.plainLyrics || null, synced: parseSyncedLyrics(best.syncedLyrics) };
-  }
-  if (best.plainLyrics) {
-    return { plain: best.plainLyrics, synced: [] };
-  }
+  if (!data?.length) return null;
+
+  // Prefer synced, then any
+  const best = data.find(d => d.syncedLyrics) || data[0];
+  if (best.syncedLyrics) return { plain: best.plainLyrics || null, synced: parseSyncedLyrics(best.syncedLyrics) };
+  if (best.plainLyrics)  return { plain: best.plainLyrics, synced: [] };
   return null;
 }
 
-// ── Source 3: lyrics.ovh (plain text fallback) ────────────────
+// ── Source 3: Happi.dev (Bollywood / Hindi champion) ─────────────────────────
+async function fetchFromHappi(artist, title) {
+  const HAPPI_KEY = import.meta.env.VITE_HAPPI_API_KEY;
+  if (!HAPPI_KEY) return null;
+
+  try {
+    const q = encodeURIComponent(`${title} ${isLabel(artist) ? '' : artist}`.trim());
+    const searchRes = await fetch(
+      `https://api.happi.dev/v1/music?q=${q}&limit=5&type=song`,
+      {
+        headers: { 'x-happi-key': HAPPI_KEY },
+        signal: AbortSignal.timeout(5000),
+      }
+    );
+    if (!searchRes.ok) return null;
+    const searchData = await searchRes.json();
+    if (!searchData?.result?.length) return null;
+
+    // Pick best match
+    const match = searchData.result[0];
+    const lyricsRes = await fetch(match.api_lyrics, {
+      headers: { 'x-happi-key': HAPPI_KEY },
+      signal: AbortSignal.timeout(4000),
+    });
+    if (!lyricsRes.ok) return null;
+    const lyricsData = await lyricsRes.json();
+    if (lyricsData?.result?.lyrics) {
+      return { plain: lyricsData.result.lyrics, synced: [] };
+    }
+  } catch { /* timeout or network */ }
+  return null;
+}
+
+// ── Source 4: lyrics.ovh (English plain text fallback) ───────────────────────
 async function fetchFromLyricsOvh(artist, title) {
-  const res = await fetch(
-    `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`
-  );
-  if (!res.ok) return null;
-  const data = await res.json();
-  if (data.lyrics) {
-    return { plain: data.lyrics, synced: [] };
-  }
+  if (isLabel(artist)) return null; // Won't work with label names
+  try {
+    const res = await fetch(
+      `https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`,
+      { signal: AbortSignal.timeout(4000) }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.lyrics) return { plain: data.lyrics, synced: [] };
+  } catch { /* cors / timeout */ }
   return null;
 }
 
-// ── Main fetch function — PARALLEL RACE ───────────────────────
-/**
- * Fetches lyrics using parallel racing strategy:
- * - All 3 sources fire simultaneously
- * - First source that returns synced lyrics wins immediately  
- * - If no synced found, first plain text result is returned
- * - Typical response: <200ms for cached, <800ms for new
- */
+// ── Main export ───────────────────────────────────────────────────────────────
 export async function fetchLyrics(artist, title, duration) {
   const cleanArtist = cleanForSearch(artist);
-  const cleanTitle = cleanForSearch(title);
-  
-  if (!cleanArtist && !cleanTitle) return { plain: null, synced: [] };
-  
+  const cleanTitle  = cleanForSearch(title);
+
+  if (!cleanTitle) return { plain: null, synced: [] };
+
   const cacheKey = `${cleanArtist}::${cleanTitle}`.toLowerCase();
   const cached = getCached(cacheKey);
   if (cached) return cached;
 
-  // Race all sources in parallel
   const result = await raceLyricsSources(cleanArtist, cleanTitle, duration);
-  
+
   if (result && (result.synced.length > 0 || result.plain)) {
     setCache(cacheKey, result);
   }
-  
+
   return result || { plain: null, synced: [] };
 }
 
 async function raceLyricsSources(artist, title, duration) {
-  // TRUE RACE: First synced result wins instantly.
   return new Promise((resolve) => {
-    let resolved = false;
-    let fallbackTimer = null;
+    let resolved  = false;
     let bestPlain = null;
-    let completedCount = 0;
-    const sourcesCount = 3;
+    let completed = 0;
+    const total   = 4;
 
-    const finalize = (result) => {
+    const done = (result) => {
       if (resolved) return;
       resolved = true;
-      if (fallbackTimer) clearTimeout(fallbackTimer);
       resolve(result || { plain: null, synced: [] });
     };
 
-    const handleResult = (val) => {
+    const handle = (val) => {
       if (resolved) return;
-      completedCount++;
-      
-      if (val && val.synced && val.synced.length > 0) {
-        // INSTANT WIN for Synced Lyrics
-        finalize(val);
-      } else if (val && val.plain) {
-        if (!bestPlain) bestPlain = val;
-      }
+      completed++;
 
-      // If all sources finished and no synced was found
-      if (completedCount === sourcesCount) {
-        finalize(bestPlain);
+      if (val?.synced?.length > 0) {
+        // Synced lyrics = instant win
+        done(val);
+        return;
+      }
+      if (val?.plain && !bestPlain) {
+        bestPlain = val;
+      }
+      if (completed === total) {
+        done(bestPlain);
       }
     };
 
-    // Fire all sources
-    fetchFromLRCLibExact(artist, title, duration).then(handleResult).catch(() => handleResult(null));
-    fetchFromLRCLibSearch(artist, title).then(handleResult).catch(() => handleResult(null));
-    fetchFromLyricsOvh(artist, title).then(handleResult).catch(() => handleResult(null));
+    // Fire all 4 sources in parallel
+    fetchFromLRCLibExact(artist, title, duration).then(handle).catch(() => handle(null));
+    fetchFromLRCLibSearch(artist, title).then(handle).catch(() => handle(null));
+    fetchFromHappi(artist, title).then(handle).catch(() => handle(null));
+    fetchFromLyricsOvh(artist, title).then(handle).catch(() => handle(null));
 
-    // Hard timeout: 5 seconds. Return best plain if we have it, else null.
-    fallbackTimer = setTimeout(() => {
-      if (!resolved) finalize(bestPlain);
-    }, 5000);
+    // Hard timeout 7s
+    setTimeout(() => { if (!resolved) done(bestPlain); }, 7000);
   });
 }
 
-/**
- * Clears lyrics cache
- */
 export function clearLyricsCache() {
   memCache.clear();
   localStorage.removeItem(STORAGE_KEY);

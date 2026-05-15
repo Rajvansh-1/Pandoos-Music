@@ -1,14 +1,17 @@
 import { usePlayer } from '../context/PlayerContext.jsx';
 import { useNavigate } from 'react-router-dom';
 import PandaLogo from '../components/Brand/PandaLogo.jsx';
+import { useGamificationStore, BADGE_DEFINITIONS } from '../stores/useGamificationStore';
+import XPProgress from '../features/gamification/XPProgress';
 import './Stats.css';
 
 export default function Stats() {
   const { state } = usePlayer();
   const navigate = useNavigate();
+  const gamification = useGamificationStore();
 
-  const totalPlays = Object.values(state.playStats || {}).reduce((a, b) => a + b, 0);
-  const streak = state.currentStreak || 0;
+  const totalPlays = gamification.totalSongsPlayed;
+  const streak = gamification.currentStreak;
   
   // Get top songs
   const topSongIds = Object.entries(state.playStats || {})
@@ -77,6 +80,48 @@ export default function Stats() {
               <div className="stats-msg text-secondary">Your curated collection.</div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ── Gamification XP & Badges ── */}
+      <section className="content-section">
+        <h2 className="section-title">Your Progress</h2>
+        <div style={{ marginBottom: 32 }}>
+          <XPProgress />
+        </div>
+
+        <h3 className="section-title" style={{ fontSize: '1.2rem', marginTop: 32 }}>Unlocked Badges</h3>
+        <div className="badges-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '16px' }}>
+          {gamification.unlockedBadges.length === 0 ? (
+            <div className="text-secondary" style={{ gridColumn: '1 / -1', padding: 32, textAlign: 'center', background: 'var(--bg-surface)', borderRadius: 16 }}>
+              Play music to unlock your first badge!
+            </div>
+          ) : (
+            gamification.unlockedBadges.map((badgeId) => {
+              const badge = BADGE_DEFINITIONS[badgeId];
+              if (!badge) return null;
+              return (
+                <div key={badgeId} style={{ 
+                  background: 'var(--bg-surface)', 
+                  padding: 16, 
+                  borderRadius: 16, 
+                  textAlign: 'center',
+                  border: '1px solid var(--border-glass)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8
+                }}>
+                  <div style={{ fontSize: '2.5rem', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.5))' }}>
+                    {badge.emoji}
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '0.9rem' }}>
+                    {badge.name}
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                    {badge.description}
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </section>
 
